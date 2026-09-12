@@ -1,9 +1,10 @@
 import type { NormalizedLandmark, PoseLandmarker } from '@mediapipe/tasks-vision';
 
 import type { PoseFrame } from '@/lib/biomechanics';
+import type { SportModality } from '@/lib/types';
 
 const WASM_ROOT = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm';
-const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
 
 let landmarkerPromise: Promise<PoseLandmarker> | null = null;
 
@@ -65,6 +66,7 @@ function seek(video: HTMLVideoElement, time: number): Promise<void> {
 export async function sampleVideoPoses(
   video: HTMLVideoElement,
   onProgress: (progress: number) => void,
+  modality: SportModality = 'cycling',
 ): Promise<PoseFrame[]> {
   if (!Number.isFinite(video.duration) || video.duration <= 0) {
     throw new Error('El video no tiene una duración válida.');
@@ -74,7 +76,9 @@ export async function sampleVideoPoses(
   const usableDuration = Math.min(video.duration, 20);
   const start = usableDuration > 4 ? 0.75 : 0;
   const end = usableDuration > 4 ? usableDuration - 0.75 : usableDuration;
-  const sampleCount = Math.min(72, Math.max(18, Math.floor((end - start) * 6)));
+  const baseSampleRate = modality === 'running' ? 10 : 6;
+  const maxSamples = modality === 'running' ? 200 : 72;
+  const sampleCount = Math.min(maxSamples, Math.max(18, Math.floor((end - start) * baseSampleRate)));
   const frames: PoseFrame[] = [];
 
   video.pause();

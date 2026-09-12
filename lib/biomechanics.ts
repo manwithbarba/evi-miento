@@ -1,3 +1,5 @@
+import { SIDE_LANDMARKS } from './landmarks';
+
 export type Side = 'left' | 'right';
 
 export interface LandmarkPoint {
@@ -21,16 +23,18 @@ export interface AnalysisSummary {
   kneeFlexionBdc: number;
   hipAngleMin: number;
   torsoAngleMedian: number;
+  /** Media de visibilidad por landmark en los cuadros válidos. */
+  detectionConfidence: number;
+  /** Proporción de cuadros válidos sobre el total. */
+  frameCoverage: number;
+  /** Producto de detectionConfidence × frameCoverage (derivado). */
   confidence: number;
   validFrames: number;
   totalFrames: number;
   selectedFrame: PoseFrame;
 }
 
-const SIDE_INDEX = {
-  left: { shoulder: 11, hip: 23, knee: 25, ankle: 27 },
-  right: { shoulder: 12, hip: 24, knee: 26, ankle: 28 },
-} as const;
+// Landmark indices imported from lib/landmarks.ts (SIDE_LANDMARKS)
 
 export function angleAt(
   first: LandmarkPoint,
@@ -73,7 +77,7 @@ export function summarizePoseFrames(
   side: Side,
   minimumVisibility = 0.55,
 ): AnalysisSummary | null {
-  const index = SIDE_INDEX[side];
+  const index = SIDE_LANDMARKS[side];
   const measured = frames
     .map((frame) => {
       const shoulder = frame.landmarks[index.shoulder];
@@ -103,14 +107,16 @@ export function summarizePoseFrames(
   const kneeFlexionBdc = 180 - bottomDeadCentre.includedKneeAngle;
   const hipAngleMin = Math.min(...measured.map((item) => item.hipAngle));
   const torsoAngleMedian = median(measured.map((item) => item.torsoAngle));
-  const detectionConfidence = measured.reduce((sum, item) => sum + item.confidence, 0) / measured.length;
+  const avgDetection = measured.reduce((sum, item) => sum + item.confidence, 0) / measured.length;
   const coverage = measured.length / Math.max(frames.length, 1);
 
   return {
     kneeFlexionBdc: rounded(kneeFlexionBdc),
     hipAngleMin: rounded(hipAngleMin),
     torsoAngleMedian: rounded(torsoAngleMedian),
-    confidence: rounded(Math.min(1, detectionConfidence * coverage)),
+    detectionConfidence: rounded(avgDetection),
+    frameCoverage: rounded(coverage),
+    confidence: rounded(Math.min(1, avgDetection * coverage)),
     validFrames: measured.length,
     totalFrames: frames.length,
     selectedFrame: bottomDeadCentre.frame,
@@ -158,7 +164,9 @@ export function makeDemoSummary(): AnalysisSummary {
     kneeFlexionBdc: 31.8,
     hipAngleMin: 78.4,
     torsoAngleMedian: 41.2,
-    confidence: 0.94,
+    detectionConfidence: 0.96,
+    frameCoverage: 0.94,
+    confidence: 0.9,
     validFrames: 64,
     totalFrames: 68,
     selectedFrame: { time: 4.2, landmarks },

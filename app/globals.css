@@ -101,6 +101,8 @@
   .joint { fill: #bef264; stroke: #0b1016; stroke-width: 4; }
   .angle-arc { fill: none; stroke: #bef264; stroke-width: 3; stroke-dasharray: 5 4; }
   .angle-text { fill: #d9f99d; font-family: var(--font-geist-mono); font-size: 19px; font-weight: 700; }
+  .treadmill-lines rect { fill: #1e293b; stroke: #344454; stroke-width: 3; }
+  .treadmill-lines line { stroke: #475569; stroke-width: 2; stroke-dasharray: 6 4; }
   .frame-tag {
     @apply absolute bottom-4 left-4 flex items-center gap-2 rounded-lg border border-lime-300/15 bg-[#0b1016]/90 px-3 py-2 text-xs text-lime-100 backdrop-blur-md;
   }

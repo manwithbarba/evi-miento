@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'VeloFit Lab · Bike fitting asistido',
-  description: 'Analizá un video lateral, medí ángulos y documentá cada ajuste de la bicicleta.',
+  title: 'Movimiento · Análisis biomecánico deportivo',
+  description: 'Analizá un video lateral de ciclismo o carrera, medí ángulos y documentá cada ajuste.',
 };
 
 export default function RootLayout({
