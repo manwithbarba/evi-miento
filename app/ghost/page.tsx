@@ -56,6 +56,33 @@ interface PopulationGhostManifest {
   nextStep: string;
 }
 
+interface PopulationCurve {
+  median: number[];
+  p10: number[];
+  p90: number[];
+}
+
+interface PopulationBand {
+  median: number;
+  p10: number;
+  p90: number;
+  unit: string;
+}
+
+interface PopulationStratum {
+  label: string;
+  nEffective: number;
+  curves?: Record<string, PopulationCurve>;
+  metrics?: Record<string, PopulationBand>;
+}
+
+interface PopulationGhostFile {
+  modality: GhostModality;
+  defaultStratum: string;
+  population: { nEffective: number };
+  strata: Record<string, PopulationStratum>;
+}
+
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 const FIXTURES: Record<GhostModality, Record<GhostView, string>> = {
@@ -73,12 +100,37 @@ function assetPath(path: string) {
   return `${BASE_PATH}${path}`;
 }
 
-function GhostSketch({ modality, view }: { modality: GhostModality; view: GhostView }) {
+function averageCurveSpread(curves: Record<string, PopulationCurve> | undefined) {
+  const spreads = Object.values(curves ?? {}).flatMap((curve) => curve.p10.map((value, index) => curve.p90[index] - value));
+  return spreads.length ? spreads.reduce((sum, value) => sum + value, 0) / spreads.length : 0;
+}
+
+function PopulationOverlay({ modality, cohort }: { modality: GhostModality; cohort: PopulationGhostFile }) {
+  const stratum = cohort.strata[cohort.defaultStratum];
+  if (!stratum) return null;
+
+  const bandWidth = modality === 'running'
+    ? Math.max(14, Math.min(34, 14 + averageCurveSpread(stratum.curves) / 2.5))
+    : Math.max(14, Math.min(34, 14 + ((stratum.metrics?.kneeFlexionRangeDeg?.p90 ?? 0) - (stratum.metrics?.kneeFlexionRangeDeg?.p10 ?? 0)) / 1.7));
+  const bodyPath = modality === 'running'
+    ? 'M264 66 L250 145 M250 145 L211 205 L197 242 M250 145 L290 201 L312 239 M260 91 L225 126 M260 91 L300 132'
+    : 'M238 69 L232 82 L172 145 M232 82 L278 96 L340 121 M172 145 L222 184 L234 205 L245 215 M172 145 L150 202 L156 235 L165 255';
+
+  return (
+    <g className="ghost-population" aria-label={`Rango poblacional P10 a P90, n efectivo ${stratum.nEffective}`}>
+      <path className="ghost-population-band" d={bodyPath} style={{ strokeWidth: bandWidth }} />
+      <path className="ghost-population-median" d={bodyPath} />
+    </g>
+  );
+}
+
+function GhostSketch({ modality, view, cohortGhost }: { modality: GhostModality; view: GhostView; cohortGhost?: PopulationGhostFile }) {
   if (modality === 'running') {
     return (
       <svg viewBox="0 0 520 300" aria-label={`Fantasma de running en plano ${view}`}>
         <title>Fantasma de running</title>
         <path className="ghost-ground" d="M55 260 H465" />
+        {cohortGhost ? <PopulationOverlay modality={modality} cohort={cohortGhost} /> : null}
         <circle className="ghost-head" cx="270" cy="47" r="18" />
         <path className="ghost-body" d="M264 66 L250 145 M250 145 L211 205 L197 242 M250 145 L290 201 L312 239 M260 91 L225 126 M260 91 L300 132" />
         <circle className="ghost-joint" cx="260" cy="91" r="5" /><circle className="ghost-joint" cx="250" cy="145" r="5" />
@@ -93,16 +145,31 @@ function GhostSketch({ modality, view }: { modality: GhostModality; view: GhostV
 
   return (
     <svg viewBox="0 0 520 300" aria-label={`Fantasma de bike en plano ${view}`}>
-      <title>Fantasma de bike</title>
-      <g className="ghost-bike"><circle cx="105" cy="235" r="47" /><circle cx="400" cy="235" r="47" /><path d="M105 235 L205 235 L172 155 L315 165 L400 235 L205 235 L315 165" /><path d="M172 155 L155 128 M315 165 L340 119 M325 125 H365" /></g>
-      <path className="ghost-body" d="M246 45 L230 72 L204 146 L278 163 L330 123 M204 146 L236 205 L212 235 M204 146 L169 203 L203 235" />
-      <circle className="ghost-head" cx="252" cy="30" r="16" />
-      <circle className="ghost-joint" cx="230" cy="72" r="5" /><circle className="ghost-joint" cx="204" cy="146" r="5" />
-      <circle className="ghost-joint" cx="236" cy="205" r="5" /><circle className="ghost-joint" cx="212" cy="235" r="5" />
-      <circle className="ghost-joint" cx="278" cy="163" r="5" /><circle className="ghost-joint" cx="330" cy="123" r="5" />
-      <text className="ghost-caption" x="340" y="55">BDC 38.6°</text>
-      <text className="ghost-caption" x="340" y="78">cadera 86.2°</text>
-      <text className="ghost-caption" x="340" y="101">biplanar</text>
+      <title>Fantasma de bike con dos miembros inferiores y cinco apoyos</title>
+      <g className="ghost-bike">
+        <circle cx="105" cy="235" r="47" />
+        <circle cx="400" cy="235" r="47" />
+        <path d="M105 235 L205 235 L172 155 L315 165 L400 235 L205 235 L315 165" />
+        <path d="M172 155 L155 128 M315 165 L340 119 M325 125 H365" />
+        <path className="ghost-crank" d="M205 235 L245 215 M205 235 L165 255" />
+        <circle className="ghost-support" cx="172" cy="155" r="6" />
+        <circle className="ghost-support" cx="340" cy="121" r="6" />
+        <circle className="ghost-support" cx="334" cy="126" r="6" />
+        <circle className="ghost-support" cx="245" cy="215" r="6" />
+        <circle className="ghost-support" cx="165" cy="255" r="6" />
+      </g>
+      {cohortGhost ? <PopulationOverlay modality={modality} cohort={cohortGhost} /> : null}
+      <path className="ghost-support-link" d="M172 145 L172 155" />
+      <path className="ghost-body" d="M238 69 L232 82 L172 145 M232 82 L278 96 L340 121 M172 145 L222 184 L234 205 L245 215 M172 145 L150 202 L156 235 L165 255" />
+      <path className="ghost-body ghost-body-far" d="M228 87 L266 109 L334 126" />
+      <circle className="ghost-head" cx="238" cy="53" r="16" />
+      <circle className="ghost-joint" cx="232" cy="82" r="5" /><circle className="ghost-joint" cx="172" cy="145" r="5" />
+      <circle className="ghost-joint" cx="278" cy="96" r="5" /><circle className="ghost-joint" cx="222" cy="184" r="5" />
+      <circle className="ghost-joint" cx="234" cy="205" r="5" /><circle className="ghost-joint" cx="150" cy="202" r="5" />
+      <circle className="ghost-joint" cx="156" cy="235" r="5" />
+      <text className="ghost-caption" x="350" y="55">BDC 38.6°</text>
+      <text className="ghost-caption" x="350" y="78">cadera 86.2°</text>
+      <text className="ghost-caption" x="350" y="101">2 piernas · 5 apoyos</text>
     </svg>
   );
 }
@@ -116,6 +183,7 @@ export default function GhostLabPage() {
   const [view, setView] = useState<GhostView>('sagittal');
   const [fixture, setFixture] = useState<GhostFixture | null>(null);
   const [population, setPopulation] = useState<PopulationGhostManifest | null>(null);
+  const [populationGhosts, setPopulationGhosts] = useState<Partial<Record<GhostModality, PopulationGhostFile>>>({});
   const [loadedFixtureUrl, setLoadedFixtureUrl] = useState<string | null>(null);
   const [populationLoading, setPopulationLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -156,6 +224,24 @@ export default function GhostLabPage() {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const files: Record<GhostModality, string> = {
+      running: assetPath('/population/cohort-ghost-running.json'),
+      cycling: assetPath('/population/cohort-ghost-cycling.json'),
+    };
+    Promise.all(Object.entries(files).map(async ([modality, url]) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`No se pudo cargar ${url}`);
+      return [modality as GhostModality, await response.json() as PopulationGhostFile] as const;
+    }))
+      .then((entries) => {
+        if (!cancelled) setPopulationGhosts(Object.fromEntries(entries) as Partial<Record<GhostModality, PopulationGhostFile>>);
+      })
+      .catch(() => { if (!cancelled) setPopulationGhosts({}); });
+    return () => { cancelled = true; };
+  }, []);
+
   const loading = loadedFixtureUrl !== fixtureUrl;
 
   return (
@@ -193,7 +279,13 @@ export default function GhostLabPage() {
               <button type="button" onClick={() => setView('frontal')} className={`ghost-toggle ${view === 'frontal' ? 'ghost-toggle-active' : ''}`}>Frontal</button>
             </fieldset>
 
-            <div className="ghost-stage mt-5"><GhostSketch modality={modality} view={view} /><div className="frame-tag"><RefreshCw className="size-3.5" /> {loading ? 'Cargando fixture…' : `${fixture?.frames.length ?? 0} cuadros · ${fixture?.fps ?? '—'} fps`}</div></div>
+            <div className="ghost-stage mt-5"><GhostSketch modality={modality} view={view} cohortGhost={populationGhosts[modality]} /><div className="frame-tag"><RefreshCw className="size-3.5" /> {loading ? 'Cargando fixture…' : `${fixture?.frames.length ?? 0} cuadros · ${fixture?.fps ?? '—'} fps`}</div></div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400" aria-label="Leyenda del fantasma">
+              <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-original" /> Fantasma original</span>
+              <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-population" /> Rango poblacional P10–P90</span>
+              <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-median" /> Mediana</span>
+              {populationGhosts[modality] ? <span className="text-amber-200">n efectivo={populationGhosts[modality]?.population.nEffective}</span> : <span>Cargando cohorte…</span>}
+            </div>
             <p className="mt-4 text-sm leading-6 text-slate-400">{reference.description}</p>
             {error ? <p className="mt-3 flex items-center gap-2 text-sm text-rose-300"><CircleAlert className="size-4" /> {error}</p> : null}
           </section>
@@ -223,7 +315,7 @@ export default function GhostLabPage() {
                 <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-[0.12em] text-lime-200">{cohort.modality === 'running' ? 'Running' : 'Bike'}</p><h3 className="mt-1 font-medium text-white">{cohort.title}</h3></div><span className="shrink-0 rounded-full bg-white/8 px-2 py-1 text-xs text-lime-100">n efectivo={cohort.nEffective}</span></div>
                 <p className="mt-3 text-sm text-slate-300">{cohort.metric.label}: <strong className="text-lime-100">mediana {cohort.metric.value}{cohort.metric.unit}</strong> · P10–P90 {cohort.metric.p10}{cohort.metric.unit}–{cohort.metric.p90}{cohort.metric.unit}</p>
                 <p className="mt-2 text-xs leading-5 text-slate-400">{cohort.scope}</p>
-                <a className="source-chip mt-4 inline-block text-xs" href={assetPath(cohort.file)} target="_blank" rel="noreferrer">Abrir agregado · mediana / P10–P90</a>
+                <a className="source-chip mt-4 inline-block text-xs" href={assetPath(cohort.file)} target="_blank" rel="noreferrer">Respaldo de datos · mediana / P10–P90</a>
               </article>
             ))}
           </div>
