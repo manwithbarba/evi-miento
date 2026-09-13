@@ -1,10 +1,30 @@
 {
-  "id": "population-ghost-open-data-candidate",
-  "version": "2026-09-13.1",
+  "id": "population-ghost-open-data",
+  "version": "2026-09-13.2",
   "status": "candidate",
   "activeInRecommendations": false,
-  "title": "Fantasma poblacional · candidato de datos abiertos",
-  "description": "Manifiesto de fuentes abiertas potencialmente útiles para construir referencias por cohorte. No contiene cortes normativos ni se usa para recomendaciones.",
+  "title": "Fantasmas poblacionales · datos abiertos procesados",
+  "description": "Índice de fuentes abiertas y dos agregados cohort-ghost reproducibles. Los agregados son referencias exploratorias y no constituyen una postura ideal ni una recomendación clínica.",
+  "cohortGhosts": [
+    {
+      "id": "cohort-ghost-running-rbds",
+      "title": "Running · RBDS · 3,5 m/s",
+      "modality": "running",
+      "file": "/population/cohort-ghost-running.json",
+      "nEffective": 39,
+      "scope": "Curva 0–100% del ciclo; mediana bilateral por participante y banda P10–P90.",
+      "metric": { "label": "Rodilla Z en contacto", "value": "11,0", "p10": "5,6", "p90": "18,7", "unit": "°" }
+    },
+    {
+      "id": "cohort-ghost-cycling-mendeley-setback",
+      "title": "Bike · setback e intensidad",
+      "modality": "cycling",
+      "file": "/population/cohort-ghost-cycling.json",
+      "nEffective": 32,
+      "scope": "Mediana de 6 condiciones por participante; P10–P90 entre participantes. El archivo reporta 34, la planilla descargable contiene 32.",
+      "metric": { "label": "Rango de flexión de rodilla", "value": "69,1", "p10": "62,7", "p90": "75,2", "unit": "°" }
+    }
+  ],
   "sources": [
     {
       "id": "bath-50-runners-2023",
@@ -14,30 +34,58 @@
       "license": "CC BY 4.0",
       "url": "https://researchdata.bath.ac.uk/1341/",
       "data": "C3D con marcadores, fuerzas de reacción e IMU; 25 mujeres y 25 varones; varias velocidades y gradientes.",
-      "suitability": "Alta para un candidato poblacional de running",
-      "limitation": "requiere extraer métricas comparables y estratificar velocidad, pendiente y protocolo de laboratorio."
+      "suitability": "Alta para ampliar un fantasma poblacional de running",
+      "limitation": "indexado, no procesado en esta versión: requiere armonizar velocidad, pendiente y protocolo."
     },
     {
-      "id": "rbds-28-runners-2017",
+      "id": "rbds-39-runners-2017",
       "title": "A public dataset of running biomechanics",
       "modality": "running",
-      "participants": 28,
+      "participants": 39,
+      "nEffective": 39,
+      "processingStatus": "processed",
+      "ghostFile": "/population/cohort-ghost-running.json",
       "license": "CC BY 4.0",
       "url": "https://doi.org/10.6084/m9.figshare.4543435",
-      "data": "Señales crudas y procesadas de cinemática/cinética en cinta a 2.5, 3.5 y 4.5 m/s, más metadatos y patrón de apoyo.",
+      "data": "Salidas procesadas de cinemática y cinética en cinta a 2,5, 3,5 y 4,5 m/s; fase normalizada a 101 puntos.",
       "suitability": "Alta para replicación y contraste de running",
-      "limitation": "muestra pequeña y predominantemente recreativa; no debe generalizarse a cualquier corredor."
+      "limitation": "muestra de laboratorio y métricas 3D; no es automáticamente equivalente a la captura 2D de la aplicación."
     },
     {
       "id": "mendeley-34-cyclists-2025",
       "title": "Changes in saddle setback and intensity affect comfort and lower limb kinematics",
       "modality": "cycling",
       "participants": 34,
+      "nEffective": 32,
+      "processingStatus": "processed",
+      "ghostFile": "/population/cohort-ghost-cycling.json",
       "license": "CC BY 4.0",
       "url": "https://data.mendeley.com/datasets/tvnwnzy8vm/1",
-      "data": "Datos de 34 ciclistas recreativos, tres posiciones de setback y dos intensidades; incluye cinemática de miembros inferiores y confort.",
+      "data": "Planilla de 192 condiciones observadas: tres posiciones de setback y dos intensidades; cinemática de miembros inferiores y cadencia.",
       "suitability": "Alta para una cohorte exploratoria de bike",
-      "limitation": "el protocolo es de cicloergómetro y la salida publicada no coincide automáticamente con la captura 2D de la aplicación."
+      "limitation": "el artículo informa 34, pero la planilla descargable contiene 32 participantes completos; protocolo de cicloergómetro y salida 3D."
+    },
+    {
+      "id": "van-hooren-19-runners-2024",
+      "title": "Dataset of running kinematics, kinetics and muscle activation at different speeds and conditions",
+      "modality": "running",
+      "participants": 19,
+      "license": "CC BY 4.0",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11737525/",
+      "data": "C3D y datos procesados con OpenSim para 13 condiciones de velocidad, pendiente, cadencia y flexión de tronco.",
+      "suitability": "Muy alta para ampliar condiciones de running",
+      "limitation": "indexado, no procesado aquí; requiere un adaptador OpenSim y una política de estratificación por condición."
+    },
+    {
+      "id": "figshare-plus-1798",
+      "title": "A Biomechanical Dataset of 1,798 Healthy and Injured Subjects",
+      "modality": "running",
+      "participants": 1798,
+      "license": "licencia visible en el registro",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11564798/",
+      "data": "Kinemática de marcha y running en cinta con metadatos de edad, sexo, historial y estado de lesión.",
+      "suitability": "Muy alta para un fantasma estratificado por población",
+      "limitation": "indexado, no procesado aquí; necesita definir comparabilidad y gobernanza de datos antes de usarlo como referencia."
     },
     {
       "id": "zenodo-cyclists-mocap-2024",
@@ -46,10 +94,21 @@
       "participants": null,
       "license": "dataset abierto · verificar términos",
       "url": "https://doi.org/10.5281/zenodo.10668611",
-      "data": "C3D, BVH y GPX de ciclistas en bicicletas de ruta y contrarreloj, con posiciones cómoda, agresiva y aero.",
-      "suitability": "Muy útil para ampliar condiciones y validar postura",
-      "limitation": "el volumen es grande y el número de participantes debe auditarse desde los archivos antes de publicar una estadística."
+      "data": "C3D, BVH y GPX de ciclismo de ruta y contrarreloj, con posiciones cómoda, agresiva y aero.",
+      "suitability": "Muy útil para ampliar condiciones posturales de bike",
+      "limitation": "indexado, no procesado: volumen declarado de 78,6 GB; hay que auditar n y seleccionar un subconjunto."
+    },
+    {
+      "id": "simtk-cycling-sim",
+      "title": "Muscle-driven simulations and experimental data of cycling",
+      "modality": "cycling",
+      "participants": 16,
+      "license": "términos del proyecto",
+      "url": "https://simtk.org/projects/cycling_sim",
+      "data": "Modelos OpenSim, trayectorias de marcadores, fuerzas del pedal y simulaciones músculo-esqueléticas.",
+      "suitability": "Alta para validar variables mecánicas y modelos",
+      "limitation": "indexado, no procesado; no representa por sí solo una cohorte poblacional de ajustes."
     }
   ],
-  "nextStep": "Descargar sólo metadatos y salidas procesadas, normalizar unidades y fase del gesto, auditar calidad por participante y generar una versión cohort-ghost separada con mediana, P10–P90, n efectivo y reporte de exclusiones."
+  "nextStep": "Resuelto en esta versión: se descargaron y procesaron salidas públicas de running y bike; se normalizaron unidades y fase cuando existía; se auditó calidad por participante; y se publicaron agregados cohort-ghost con mediana, P10–P90, n efectivo y exclusiones. Las fuentes restantes quedan enlazadas para futuras ampliaciones, sin presentarlas como procesadas."
 }

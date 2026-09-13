@@ -1,0 +1,620 @@
+{
+  "schemaVersion": "cohort-ghost.v1",
+  "id": "cohort-ghost-cycling-mendeley-setback",
+  "version": "2026-09-13.2",
+  "status": "candidate",
+  "activeInRecommendations": false,
+  "title": "Fantasma poblacional bike · setback e intensidad",
+  "modality": "cycling",
+  "population": {
+    "reportedParticipants": 34,
+    "observedParticipants": 32,
+    "nEffective": 32,
+    "includedParticipants": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32"
+    ],
+    "coverageGap": "El artículo informa 34 participantes; la planilla pública descargable contiene 32 identificadores completos."
+  },
+  "normalization": {
+    "units": "ángulos en grados; desplazamientos publicados en cm convertidos a mm; cadencia conservada en rpm",
+    "phase": "la planilla publica estadísticos por ciclo y posiciones de manivela en grados; no contiene una curva temporal 0–100%",
+    "aggregation": "mediana de las 6 condiciones por participante y luego mediana/P10/P90 entre participantes"
+  },
+  "defaultStratum": "overall",
+  "strata": {
+    "overall": {
+      "label": "mediana de las 6 condiciones",
+      "nEffective": 32,
+      "metrics": {
+        "kneeFlexionRangeDeg": {
+          "unit": "deg",
+          "median": 69.1275,
+          "p10": 62.6665,
+          "p90": 75.163,
+          "nEffective": 32
+        },
+        "hipFlexionMaxDeg": {
+          "unit": "deg",
+          "median": 68.075,
+          "p10": 61.2145,
+          "p90": 75.066,
+          "nEffective": 32
+        },
+        "hipExtensionMaxDeg": {
+          "unit": "deg",
+          "median": 25.4,
+          "p10": 19.138,
+          "p90": 33.4035,
+          "nEffective": 32
+        },
+        "hipExtensionRangeDeg": {
+          "unit": "deg",
+          "median": 95.7975,
+          "p10": 57.3945,
+          "p90": 296.7475,
+          "nEffective": 32
+        },
+        "ankleRangeDeg": {
+          "unit": "deg",
+          "median": -68.12,
+          "p10": -75.0635,
+          "p90": -55.1675,
+          "nEffective": 32
+        },
+        "pelvicTiltDeg": {
+          "unit": "deg",
+          "median": 17.55,
+          "p10": 11.6855,
+          "p90": 29.0275,
+          "nEffective": 32
+        },
+        "kneeMedialLateralRangeMm": {
+          "unit": "mm",
+          "median": 53.975,
+          "p10": 38.465,
+          "p90": 68.46,
+          "nEffective": 32
+        },
+        "hipVerticalRangeMm": {
+          "unit": "mm",
+          "median": 60.125,
+          "p10": 47.24,
+          "p90": 77.015,
+          "nEffective": 32
+        },
+        "cadenceRpm": {
+          "unit": "rpm",
+          "median": 83.11,
+          "p10": 81.162,
+          "p90": 85.8495,
+          "nEffective": 32
+        }
+      }
+    },
+    "setback0_intensity1": {
+      "label": "forward (-10%) · VT1",
+      "nEffective": 32,
+      "metrics": {
+        "kneeFlexionRangeDeg": {
+          "unit": "deg",
+          "median": 69.055,
+          "p10": 61.42,
+          "p90": 75.035,
+          "nEffective": 32,
+          "sourceColumn": "KNEE FLEXION RANGE"
+        },
+        "hipFlexionMaxDeg": {
+          "unit": "deg",
+          "median": 68.51,
+          "p10": 60.912,
+          "p90": 75.329,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP FLEXION"
+        },
+        "hipExtensionMaxDeg": {
+          "unit": "deg",
+          "median": 25.795,
+          "p10": 19.363,
+          "p90": 33.517,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP EXTENSION"
+        },
+        "hipExtensionRangeDeg": {
+          "unit": "deg",
+          "median": 93.355,
+          "p10": 52.579,
+          "p90": 250.33,
+          "nEffective": 32,
+          "sourceColumn": "HIP EXTENSION RANGE"
+        },
+        "ankleRangeDeg": {
+          "unit": "deg",
+          "median": -68.28,
+          "p10": -74.837,
+          "p90": -55.327,
+          "nEffective": 32,
+          "sourceColumn": "ANKLE RANGE"
+        },
+        "pelvicTiltDeg": {
+          "unit": "deg",
+          "median": 18.19,
+          "p10": 11.181,
+          "p90": 28.259,
+          "nEffective": 32,
+          "sourceColumn": "PELVIC TILT ANGLE"
+        },
+        "kneeMedialLateralRangeMm": {
+          "unit": "mm",
+          "median": 52.95,
+          "p10": 37.78,
+          "p90": 70.5,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM MEDIAL-LATERAL KNEE DISPLACEMENT RANGE"
+        },
+        "hipVerticalRangeMm": {
+          "unit": "mm",
+          "median": 57.45,
+          "p10": 46.95,
+          "p90": 74.17,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM VERTICAL HIP DISPLACEMENT RANGE"
+        },
+        "cadenceRpm": {
+          "unit": "rpm",
+          "median": 82.285,
+          "p10": 81.165,
+          "p90": 85.566,
+          "nEffective": 32,
+          "sourceColumn": "CADENCE"
+        }
+      }
+    },
+    "setback0_intensity2": {
+      "label": "forward (-10%) · VT2",
+      "nEffective": 32,
+      "metrics": {
+        "kneeFlexionRangeDeg": {
+          "unit": "deg",
+          "median": 69.205,
+          "p10": 62.788,
+          "p90": 74.832,
+          "nEffective": 32,
+          "sourceColumn": "KNEE FLEXION RANGE"
+        },
+        "hipFlexionMaxDeg": {
+          "unit": "deg",
+          "median": 67.285,
+          "p10": 61.305,
+          "p90": 73.441,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP FLEXION"
+        },
+        "hipExtensionMaxDeg": {
+          "unit": "deg",
+          "median": 25.305,
+          "p10": 18.643,
+          "p90": 33.29,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP EXTENSION"
+        },
+        "hipExtensionRangeDeg": {
+          "unit": "deg",
+          "median": 95.705,
+          "p10": 55.9,
+          "p90": 302.164,
+          "nEffective": 32,
+          "sourceColumn": "HIP EXTENSION RANGE"
+        },
+        "ankleRangeDeg": {
+          "unit": "deg",
+          "median": -68.785,
+          "p10": -75.409,
+          "p90": -55.324,
+          "nEffective": 32,
+          "sourceColumn": "ANKLE RANGE"
+        },
+        "pelvicTiltDeg": {
+          "unit": "deg",
+          "median": 18.47,
+          "p10": 9.152,
+          "p90": 29.497,
+          "nEffective": 32,
+          "sourceColumn": "PELVIC TILT ANGLE"
+        },
+        "kneeMedialLateralRangeMm": {
+          "unit": "mm",
+          "median": 49.8,
+          "p10": 34.81,
+          "p90": 64.0,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM MEDIAL-LATERAL KNEE DISPLACEMENT RANGE"
+        },
+        "hipVerticalRangeMm": {
+          "unit": "mm",
+          "median": 58.95,
+          "p10": 45.63,
+          "p90": 77.61,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM VERTICAL HIP DISPLACEMENT RANGE"
+        },
+        "cadenceRpm": {
+          "unit": "rpm",
+          "median": 82.74,
+          "p10": 80.383,
+          "p90": 86.166,
+          "nEffective": 32,
+          "sourceColumn": "CADENCE"
+        }
+      }
+    },
+    "setback1_intensity1": {
+      "label": "preferred · VT1",
+      "nEffective": 32,
+      "metrics": {
+        "kneeFlexionRangeDeg": {
+          "unit": "deg",
+          "median": 69.58,
+          "p10": 61.731,
+          "p90": 74.035,
+          "nEffective": 32,
+          "sourceColumn": "KNEE FLEXION RANGE"
+        },
+        "hipFlexionMaxDeg": {
+          "unit": "deg",
+          "median": 67.7,
+          "p10": 60.084,
+          "p90": 75.395,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP FLEXION"
+        },
+        "hipExtensionMaxDeg": {
+          "unit": "deg",
+          "median": 24.43,
+          "p10": 17.873,
+          "p90": 32.27,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP EXTENSION"
+        },
+        "hipExtensionRangeDeg": {
+          "unit": "deg",
+          "median": 99.775,
+          "p10": 57.338,
+          "p90": 289.751,
+          "nEffective": 32,
+          "sourceColumn": "HIP EXTENSION RANGE"
+        },
+        "ankleRangeDeg": {
+          "unit": "deg",
+          "median": -68.555,
+          "p10": -75.441,
+          "p90": -55.64,
+          "nEffective": 32,
+          "sourceColumn": "ANKLE RANGE"
+        },
+        "pelvicTiltDeg": {
+          "unit": "deg",
+          "median": 18.02,
+          "p10": 10.744,
+          "p90": 29.1,
+          "nEffective": 32,
+          "sourceColumn": "PELVIC TILT ANGLE"
+        },
+        "kneeMedialLateralRangeMm": {
+          "unit": "mm",
+          "median": 53.15,
+          "p10": 39.5,
+          "p90": 72.7,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM MEDIAL-LATERAL KNEE DISPLACEMENT RANGE"
+        },
+        "hipVerticalRangeMm": {
+          "unit": "mm",
+          "median": 59.1,
+          "p10": 43.59,
+          "p90": 73.67,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM VERTICAL HIP DISPLACEMENT RANGE"
+        },
+        "cadenceRpm": {
+          "unit": "rpm",
+          "median": 82.88,
+          "p10": 81.231,
+          "p90": 85.419,
+          "nEffective": 32,
+          "sourceColumn": "CADENCE"
+        }
+      }
+    },
+    "setback1_intensity2": {
+      "label": "preferred · VT2",
+      "nEffective": 32,
+      "metrics": {
+        "kneeFlexionRangeDeg": {
+          "unit": "deg",
+          "median": 69.245,
+          "p10": 62.027,
+          "p90": 75.019,
+          "nEffective": 32,
+          "sourceColumn": "KNEE FLEXION RANGE"
+        },
+        "hipFlexionMaxDeg": {
+          "unit": "deg",
+          "median": 67.32,
+          "p10": 59.373,
+          "p90": 73.704,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP FLEXION"
+        },
+        "hipExtensionMaxDeg": {
+          "unit": "deg",
+          "median": 23.915,
+          "p10": 17.463,
+          "p90": 31.944,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP EXTENSION"
+        },
+        "hipExtensionRangeDeg": {
+          "unit": "deg",
+          "median": 98.35,
+          "p10": 57.895,
+          "p90": 303.138,
+          "nEffective": 32,
+          "sourceColumn": "HIP EXTENSION RANGE"
+        },
+        "ankleRangeDeg": {
+          "unit": "deg",
+          "median": -67.75,
+          "p10": -76.681,
+          "p90": -54.767,
+          "nEffective": 32,
+          "sourceColumn": "ANKLE RANGE"
+        },
+        "pelvicTiltDeg": {
+          "unit": "deg",
+          "median": 18.565,
+          "p10": 10.703,
+          "p90": 26.971,
+          "nEffective": 32,
+          "sourceColumn": "PELVIC TILT ANGLE"
+        },
+        "kneeMedialLateralRangeMm": {
+          "unit": "mm",
+          "median": 51.45,
+          "p10": 39.05,
+          "p90": 67.94,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM MEDIAL-LATERAL KNEE DISPLACEMENT RANGE"
+        },
+        "hipVerticalRangeMm": {
+          "unit": "mm",
+          "median": 60.7,
+          "p10": 46.99,
+          "p90": 75.43,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM VERTICAL HIP DISPLACEMENT RANGE"
+        },
+        "cadenceRpm": {
+          "unit": "rpm",
+          "median": 82.905,
+          "p10": 81.09,
+          "p90": 87.219,
+          "nEffective": 32,
+          "sourceColumn": "CADENCE"
+        }
+      }
+    },
+    "setback2_intensity1": {
+      "label": "backward (+10%) · VT1",
+      "nEffective": 32,
+      "metrics": {
+        "kneeFlexionRangeDeg": {
+          "unit": "deg",
+          "median": 69.88,
+          "p10": 63.48,
+          "p90": 75.062,
+          "nEffective": 32,
+          "sourceColumn": "KNEE FLEXION RANGE"
+        },
+        "hipFlexionMaxDeg": {
+          "unit": "deg",
+          "median": 68.795,
+          "p10": 62.131,
+          "p90": 75.142,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP FLEXION"
+        },
+        "hipExtensionMaxDeg": {
+          "unit": "deg",
+          "median": 26.3,
+          "p10": 20.138,
+          "p90": 34.182,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP EXTENSION"
+        },
+        "hipExtensionRangeDeg": {
+          "unit": "deg",
+          "median": 87.725,
+          "p10": 50.62,
+          "p90": 322.33,
+          "nEffective": 32,
+          "sourceColumn": "HIP EXTENSION RANGE"
+        },
+        "ankleRangeDeg": {
+          "unit": "deg",
+          "median": -67.805,
+          "p10": -75.164,
+          "p90": -56.091,
+          "nEffective": 32,
+          "sourceColumn": "ANKLE RANGE"
+        },
+        "pelvicTiltDeg": {
+          "unit": "deg",
+          "median": 18.62,
+          "p10": 7.927,
+          "p90": 30.194,
+          "nEffective": 32,
+          "sourceColumn": "PELVIC TILT ANGLE"
+        },
+        "kneeMedialLateralRangeMm": {
+          "unit": "mm",
+          "median": 54.25,
+          "p10": 38.8,
+          "p90": 74.43,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM MEDIAL-LATERAL KNEE DISPLACEMENT RANGE"
+        },
+        "hipVerticalRangeMm": {
+          "unit": "mm",
+          "median": 59.8,
+          "p10": 48.91,
+          "p90": 80.52,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM VERTICAL HIP DISPLACEMENT RANGE"
+        },
+        "cadenceRpm": {
+          "unit": "rpm",
+          "median": 83.015,
+          "p10": 79.728,
+          "p90": 86.01,
+          "nEffective": 32,
+          "sourceColumn": "CADENCE"
+        }
+      }
+    },
+    "setback2_intensity2": {
+      "label": "backward (+10%) · VT2",
+      "nEffective": 32,
+      "metrics": {
+        "kneeFlexionRangeDeg": {
+          "unit": "deg",
+          "median": 69.485,
+          "p10": 64.672,
+          "p90": 75.857,
+          "nEffective": 32,
+          "sourceColumn": "KNEE FLEXION RANGE"
+        },
+        "hipFlexionMaxDeg": {
+          "unit": "deg",
+          "median": 68.665,
+          "p10": 61.979,
+          "p90": 75.289,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP FLEXION"
+        },
+        "hipExtensionMaxDeg": {
+          "unit": "deg",
+          "median": 26.335,
+          "p10": 20.216,
+          "p90": 34.669,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM HIP EXTENSION"
+        },
+        "hipExtensionRangeDeg": {
+          "unit": "deg",
+          "median": 87.57,
+          "p10": 47.692,
+          "p90": 266.463,
+          "nEffective": 32,
+          "sourceColumn": "HIP EXTENSION RANGE"
+        },
+        "ankleRangeDeg": {
+          "unit": "deg",
+          "median": -67.555,
+          "p10": -75.019,
+          "p90": -55.443,
+          "nEffective": 32,
+          "sourceColumn": "ANKLE RANGE"
+        },
+        "pelvicTiltDeg": {
+          "unit": "deg",
+          "median": 19.16,
+          "p10": 9.85,
+          "p90": 31.917,
+          "nEffective": 32,
+          "sourceColumn": "PELVIC TILT ANGLE"
+        },
+        "kneeMedialLateralRangeMm": {
+          "unit": "mm",
+          "median": 54.85,
+          "p10": 34.55,
+          "p90": 72.03,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM MEDIAL-LATERAL KNEE DISPLACEMENT RANGE"
+        },
+        "hipVerticalRangeMm": {
+          "unit": "mm",
+          "median": 61.6,
+          "p10": 47.83,
+          "p90": 86.04,
+          "nEffective": 32,
+          "sourceColumn": "MAXIMUM VERTICAL HIP DISPLACEMENT RANGE"
+        },
+        "cadenceRpm": {
+          "unit": "rpm",
+          "median": 83.4,
+          "p10": 80.957,
+          "p90": 87.193,
+          "nEffective": 32,
+          "sourceColumn": "CADENCE"
+        }
+      }
+    }
+  },
+  "qualityAudit": {
+    "sourceRows": 192,
+    "reportedParticipants": 34,
+    "observedParticipants": 32,
+    "includedParticipants": 32,
+    "excludedParticipants": 0,
+    "exclusions": [],
+    "checks": [
+      "6 condiciones por participante",
+      "9 métricas requeridas finitas",
+      "reducción a una observación por participante",
+      "cm→mm documentado"
+    ]
+  },
+  "sources": [
+    {
+      "title": "Mendeley Data · Changes in saddle setback and intensity affect comfort and lower limb kinematics",
+      "url": "https://data.mendeley.com/datasets/tvnwnzy8vm/1",
+      "license": "CC BY 4.0"
+    },
+    {
+      "title": "Scientific Reports article and methods",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12238236/",
+      "license": "CC BY-NC-ND 4.0"
+    }
+  ]
+}

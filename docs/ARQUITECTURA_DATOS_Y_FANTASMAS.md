@@ -30,8 +30,11 @@ La aplicación actual es local-first: guarda la última línea base en
 romper ese modo de uso ni exigir subir el video.
 
 La ruta pública `/ghost/` sirve como laboratorio de QA. Carga los fixtures
-sintéticos y el manifiesto `public/population/ghost-manifest.json`, pero no
-activa la referencia poblacional en las recomendaciones.
+sintéticos, el índice de fuentes abiertas y los agregados
+`public/population/cohort-ghost-running.json` y
+`public/population/cohort-ghost-cycling.json`. Estos últimos ya contienen
+mediana, P10–P90, n efectivo y auditoría de exclusiones, pero siguen fuera de
+las recomendaciones automáticas.
 
 ## Flujo de incorporación
 
@@ -75,6 +78,14 @@ antes que un promedio único.
   lesión. El feedback experimental debe incluir tolerancia, confort y capacidad
   de volver a la versión anterior.
 - Todo agregado publicado conserva la versión previa y su reporte de calidad.
+
+La primera corrida reproducible está en
+`scripts/process_population_ghosts.py`. Procesa en paralelo el RBDS de running
+y la planilla pública de bike, estratifica las velocidades/condiciones, no
+mezcla fases incompatibles y deja el informe en
+`public/population/cohort-ghost-quality.md`. En RBDS se obtuvieron n efectivos
+31, 39 y 31 para 2,5, 3,5 y 4,5 m/s; en bike se observaron 32 participantes
+completos de los 34 informados por el artículo.
 
 ## Respaldo operativo
 

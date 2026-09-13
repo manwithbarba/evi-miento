@@ -29,6 +29,19 @@ interface PopulationSource {
   data: string;
   suitability: string;
   limitation: string;
+  nEffective?: number;
+  processingStatus?: string;
+  ghostFile?: string;
+}
+
+interface CohortGhostSummary {
+  id: string;
+  title: string;
+  modality: GhostModality;
+  file: string;
+  nEffective: number;
+  scope: string;
+  metric: { label: string; value: string; p10: string; p90: string; unit: string };
 }
 
 interface PopulationGhostManifest {
@@ -39,6 +52,7 @@ interface PopulationGhostManifest {
   title: string;
   description: string;
   sources: PopulationSource[];
+  cohortGhosts: CohortGhostSummary[];
   nextStep: string;
 }
 
@@ -66,10 +80,10 @@ function GhostSketch({ modality, view }: { modality: GhostModality; view: GhostV
         <title>Fantasma de running</title>
         <path className="ghost-ground" d="M55 260 H465" />
         <circle className="ghost-head" cx="270" cy="47" r="18" />
-        <path className="ghost-body" d="M264 66 L250 145 L266 206 L252 254 M250 145 L211 205 L197 242 M250 145 L290 201 L312 239 M260 91 L225 126 M260 91 L300 132" />
+        <path className="ghost-body" d="M264 66 L250 145 M250 145 L211 205 L197 242 M250 145 L290 201 L312 239 M260 91 L225 126 M260 91 L300 132" />
         <circle className="ghost-joint" cx="260" cy="91" r="5" /><circle className="ghost-joint" cx="250" cy="145" r="5" />
-        <circle className="ghost-joint" cx="266" cy="206" r="5" /><circle className="ghost-joint" cx="252" cy="254" r="5" />
-        <circle className="ghost-joint" cx="197" cy="242" r="5" /><circle className="ghost-joint" cx="312" cy="239" r="5" />
+        <circle className="ghost-joint" cx="211" cy="205" r="5" /><circle className="ghost-joint" cx="197" cy="242" r="5" />
+        <circle className="ghost-joint" cx="290" cy="201" r="5" /><circle className="ghost-joint" cx="312" cy="239" r="5" />
         <text className="ghost-caption" x="330" y="55">171.4 SPM</text>
         <text className="ghost-caption" x="330" y="78">FSA 2.9°</text>
         <text className="ghost-caption" x="330" y="101">biplanar</text>
@@ -159,8 +173,8 @@ export default function GhostLabPage() {
       <section className="mx-auto max-w-[1240px] px-5 py-8 lg:px-8 lg:py-12">
         <div className="max-w-3xl">
           <p className="step-label">Página pública de prueba</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">Probá el fantasma sin convertirlo en una norma.</h1>
-          <p className="mt-4 text-base leading-7 text-slate-400">Esta página carga los fixtures inmutables de running y bike, muestra su trazabilidad y verifica que las métricas del caso sintético sigan alineadas con la referencia esperada.</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">simulá ajustes</h1>
+          <p className="mt-4 text-base leading-7 text-slate-400">Probá los fantasmas de running y bike con dos miembros inferiores, revisá las métricas de control y compará referencias poblacionales procesadas sin convertirlas en una norma.</p>
         </div>
 
         <div className="mt-8 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
@@ -201,18 +215,28 @@ export default function GhostLabPage() {
         </div>
 
         <section className="panel mt-5 p-5 sm:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="step-label">Datos abiertos</p><h2 className="mt-2 text-2xl font-semibold text-white">Fantasma poblacional: candidato, todavía no activo</h2></div><span className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/8 px-3 py-1.5 text-xs text-amber-200"><Database className="size-3.5" /> {populationLoading ? 'cargando…' : population?.status ?? 'sin manifiesto'}</span></div>
-          <p className="mt-4 max-w-4xl text-sm leading-6 text-slate-400">Sí existen datos abiertos útiles, pero no son directamente equivalentes a la salida 2D de Evi Miento. Este manifiesto publica la procedencia y deja el agregado como candidato hasta re-procesar señales, armonizar protocolos y calcular estadísticas robustas por cohorte.</p>
+          <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="step-label">Datos abiertos</p><h2 className="mt-2 text-2xl font-semibold text-white">Fantasmas poblacionales procesados</h2></div><span className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/8 px-3 py-1.5 text-xs text-amber-200"><Database className="size-3.5" /> {populationLoading ? 'cargando…' : population?.status ?? 'sin manifiesto'}</span></div>
+          <p className="mt-4 max-w-4xl text-sm leading-6 text-slate-400">Se procesaron salidas públicas de running y bike, con unidades y fase documentadas, control por participante y agregación robusta. Siguen siendo referencias exploratorias: no son una postura ideal ni activan recomendaciones automáticas.</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {population?.cohortGhosts.map((cohort) => (
+              <article key={cohort.id} className="rounded-xl border border-lime-300/15 bg-lime-300/5 p-4">
+                <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-[0.12em] text-lime-200">{cohort.modality === 'running' ? 'Running' : 'Bike'}</p><h3 className="mt-1 font-medium text-white">{cohort.title}</h3></div><span className="shrink-0 rounded-full bg-white/8 px-2 py-1 text-xs text-lime-100">n efectivo={cohort.nEffective}</span></div>
+                <p className="mt-3 text-sm text-slate-300">{cohort.metric.label}: <strong className="text-lime-100">mediana {cohort.metric.value}{cohort.metric.unit}</strong> · P10–P90 {cohort.metric.p10}{cohort.metric.unit}–{cohort.metric.p90}{cohort.metric.unit}</p>
+                <p className="mt-2 text-xs leading-5 text-slate-400">{cohort.scope}</p>
+                <a className="source-chip mt-4 inline-block text-xs" href={assetPath(cohort.file)} target="_blank" rel="noreferrer">Abrir agregado · mediana / P10–P90</a>
+              </article>
+            ))}
+          </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {population?.sources.map((source) => (
               <article key={source.id} className="rounded-xl border border-white/8 bg-black/10 p-4">
-                <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-[0.12em] text-slate-500">{source.modality === 'running' ? 'Running' : 'Bike'}</p><h3 className="mt-1 font-medium text-slate-100">{source.title}</h3></div><span className="shrink-0 rounded-full bg-white/5 px-2 py-1 text-xs text-slate-400">{source.participants ? `n=${source.participants}` : 'n pendiente'}</span></div>
+                <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-[0.12em] text-slate-500">{source.modality === 'running' ? 'Running' : 'Bike'}</p><h3 className="mt-1 font-medium text-slate-100">{source.title}</h3></div><span className="shrink-0 rounded-full bg-white/5 px-2 py-1 text-xs text-slate-400">{source.nEffective ? `n efectivo=${source.nEffective}` : source.participants ? `n informado=${source.participants}` : 'n no auditado'}</span></div>
                 <p className="mt-3 text-sm leading-6 text-slate-400">{source.data}</p><p className="mt-2 text-xs leading-5 text-slate-500">{source.suitability} Limitación: {source.limitation}</p>
                 <a className="source-chip mt-4 inline-block text-xs" href={source.url} target="_blank" rel="noreferrer">Ver fuente · {source.license}</a>
               </article>
             ))}
           </div>
-          <div className="mt-5 flex items-start gap-3 rounded-xl border border-white/8 bg-white/[.025] p-4 text-sm leading-6 text-slate-400"><CircleAlert className="mt-0.5 size-4 shrink-0 text-amber-300" /><p><strong className="text-slate-200">Siguiente paso:</strong> {population?.nextStep ?? 'validar el manifiesto y procesar los datos originales fuera de la aplicación.'}</p></div>
+          <div className="mt-5 flex items-start gap-3 rounded-xl border border-lime-300/15 bg-lime-300/5 p-4 text-sm leading-6 text-slate-300"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-lime-200" /><p><strong className="text-lime-100">Estado de esta versión:</strong> {population?.nextStep ?? 'los agregados poblacionales están incorporados como candidatos exploratorios.'} <a className="ml-1 text-lime-200 underline" href={assetPath('/population/cohort-ghost-quality.md')} target="_blank" rel="noreferrer">Ver reporte de exclusiones</a></p></div>
         </section>
 
         <footer className="mt-6 text-xs leading-5 text-slate-600">Evi Miento · página de QA pública · los fantasmas poblacionales no se usan para recomendar ajustes automáticamente.</footer>

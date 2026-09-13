@@ -111,7 +111,8 @@ npm run eval:synthetic
 
 ## 6. Evidencia, datos y documentación
 
-- [Laboratorio público de fantasmas](https://manwithbarba.github.io/evi-miento/ghost/): prueba estática de los fixtures sintéticos y del manifiesto de fuentes abiertas.
+- [Laboratorio público de fantasmas](https://manwithbarba.github.io/evi-miento/ghost/): prueba estática de los fixtures sintéticos, los dos miembros inferiores y los agregados poblacionales procesados.
+- [Agregado running](https://manwithbarba.github.io/evi-miento/population/cohort-ghost-running.json) · [agregado bike](https://manwithbarba.github.io/evi-miento/population/cohort-ghost-cycling.json) · [reporte de calidad y exclusiones](https://manwithbarba.github.io/evi-miento/population/cohort-ghost-quality.md).
 - [Protocolo y Metodología de Evaluación Cinemática](docs/METODOLOGIA_EVALUACION.md): captura, métricas, límites y política de interpretación.
 - [Referencias Bibliográficas y Evidencia Científica](docs/REFERENCIAS_BIBLIOGRAFICAS.md): revisiones sistemáticas y metaanálisis recuperados.
 - [Arquitectura de Datos y Fantasmas](docs/ARQUITECTURA_DATOS_Y_FANTASMAS.md): separación entre fixtures sintéticos, líneas base personales y referencias poblacionales versionadas.
