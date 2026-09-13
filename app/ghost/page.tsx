@@ -74,6 +74,7 @@ interface PopulationStratum {
   nEffective: number;
   curves?: Record<string, PopulationCurve>;
   metrics?: Record<string, PopulationBand>;
+  participantSummaries?: Record<string, PopulationBand>;
 }
 
 interface PopulationGhostFile {
@@ -100,18 +101,32 @@ function assetPath(path: string) {
   return `${BASE_PATH}${path}`;
 }
 
-function averageCurveSpread(curves: Record<string, PopulationCurve> | undefined) {
-  const spreads = Object.values(curves ?? {}).flatMap((curve) => curve.p10.map((value, index) => curve.p90[index] - value));
-  return spreads.length ? spreads.reduce((sum, value) => sum + value, 0) / spreads.length : 0;
+function populationMetric(cohort: PopulationGhostFile, modality: GhostModality) {
+  const stratum = cohort.strata[cohort.defaultStratum];
+  const metric = modality === 'running'
+    ? stratum?.participantSummaries?.kneeAngleZAtContact
+    : stratum?.metrics?.kneeFlexionRangeDeg;
+  if (!stratum || !metric) return null;
+  return {
+    label: modality === 'running' ? 'Rodilla en contacto' : 'Rango de flexión de rodilla',
+    ...metric,
+    nEffective: stratum.nEffective,
+    stratumLabel: stratum.label,
+  };
+}
+
+function displayUnit(unit: string) {
+  return unit === 'deg' ? '°' : unit;
 }
 
 function PopulationOverlay({ modality, cohort }: { modality: GhostModality; cohort: PopulationGhostFile }) {
   const stratum = cohort.strata[cohort.defaultStratum];
   if (!stratum) return null;
 
-  const bandWidth = modality === 'running'
-    ? Math.max(14, Math.min(34, 14 + averageCurveSpread(stratum.curves) / 2.5))
-    : Math.max(14, Math.min(34, 14 + ((stratum.metrics?.kneeFlexionRangeDeg?.p90 ?? 0) - (stratum.metrics?.kneeFlexionRangeDeg?.p10 ?? 0)) / 1.7));
+  const metric = populationMetric(cohort, modality);
+  const bandWidth = metric
+    ? Math.max(10, Math.min(24, 8 + (metric.p90 - metric.p10) / 2))
+    : 12;
   const bodyPath = modality === 'running'
     ? 'M264 66 L250 145 M250 145 L211 205 L197 242 M250 145 L290 201 L312 239 M260 91 L225 126 M260 91 L300 132'
     : 'M238 69 L232 82 L172 145 M232 82 L278 96 L340 121 M172 145 L222 184 L234 205 L245 215 M172 145 L150 202 L156 235 L165 255';
@@ -119,8 +134,26 @@ function PopulationOverlay({ modality, cohort }: { modality: GhostModality; coho
   return (
     <g className="ghost-population" aria-label={`Rango poblacional P10 a P90, n efectivo ${stratum.nEffective}`}>
       <path className="ghost-population-band" d={bodyPath} style={{ strokeWidth: bandWidth }} />
-      <path className="ghost-population-median" d={bodyPath} />
     </g>
+  );
+}
+
+function PopulationRangeCard({ modality, cohort }: { modality: GhostModality; cohort: PopulationGhostFile }) {
+  const metric = populationMetric(cohort, modality);
+  if (!metric) return null;
+  const unit = displayUnit(metric.unit);
+  const span = Math.max(metric.p90 - metric.p10, 0.001);
+  const position = (value: number) => `${((value - metric.p10) / span) * 100}%`;
+  return (
+    <div className="population-range-card" aria-label={`${metric.label}: P10 ${metric.p10.toFixed(1)}${unit}, mediana ${metric.median.toFixed(1)}${unit}, P90 ${metric.p90.toFixed(1)}${unit}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div><p className="step-label">Dispersión poblacional visible</p><p className="mt-1 text-sm text-slate-200">{metric.label} · {metric.stratumLabel}</p></div>
+        <span className="shrink-0 font-mono text-xs text-amber-200">n={metric.nEffective}</span>
+      </div>
+      <div className="population-range-track" aria-hidden="true"><span className="population-range-fill" /><span className="population-range-marker" style={{ left: position(metric.p10) }} /><span className="population-range-marker population-range-marker-median" style={{ left: position(metric.median) }} /><span className="population-range-marker" style={{ left: position(metric.p90) }} /></div>
+      <div className="mt-2 flex justify-between gap-2 font-mono text-[11px] text-slate-400"><span>P10 {metric.p10.toFixed(1)}{unit}</span><span className="text-lime-200">Mediana {metric.median.toFixed(1)}{unit}</span><span>P90 {metric.p90.toFixed(1)}{unit}</span></div>
+      <p className="mt-2 text-xs leading-5 text-slate-500">La banda sobre el cuerpo es una proyección visual del rango de métricas; no representa coordenadas articulares observadas.</p>
+    </div>
   );
 }
 
@@ -136,6 +169,7 @@ function GhostSketch({ modality, view, cohortGhost }: { modality: GhostModality;
         <circle className="ghost-joint" cx="260" cy="91" r="5" /><circle className="ghost-joint" cx="250" cy="145" r="5" />
         <circle className="ghost-joint" cx="211" cy="205" r="5" /><circle className="ghost-joint" cx="197" cy="242" r="5" />
         <circle className="ghost-joint" cx="290" cy="201" r="5" /><circle className="ghost-joint" cx="312" cy="239" r="5" />
+        {cohortGhost ? <path className="ghost-population-median" d="M264 66 L250 145 M250 145 L211 205 L197 242 M250 145 L290 201 L312 239 M260 91 L225 126 M260 91 L300 132" /> : null}
         <text className="ghost-caption" x="330" y="55">171.4 SPM</text>
         <text className="ghost-caption" x="330" y="78">FSA 2.9°</text>
         <text className="ghost-caption" x="330" y="101">biplanar</text>
@@ -167,6 +201,7 @@ function GhostSketch({ modality, view, cohortGhost }: { modality: GhostModality;
       <circle className="ghost-joint" cx="278" cy="96" r="5" /><circle className="ghost-joint" cx="222" cy="184" r="5" />
       <circle className="ghost-joint" cx="234" cy="205" r="5" /><circle className="ghost-joint" cx="150" cy="202" r="5" />
       <circle className="ghost-joint" cx="156" cy="235" r="5" />
+      {cohortGhost ? <path className="ghost-population-median" d="M238 69 L232 82 L172 145 M232 82 L278 96 L340 121 M172 145 L222 184 L234 205 L245 215 M172 145 L150 202 L156 235 L165 255" /> : null}
       <text className="ghost-caption" x="350" y="55">BDC 38.6°</text>
       <text className="ghost-caption" x="350" y="78">cadera 86.2°</text>
       <text className="ghost-caption" x="350" y="101">2 piernas · 5 apoyos</text>
@@ -282,10 +317,11 @@ export default function GhostLabPage() {
             <div className="ghost-stage mt-5"><GhostSketch modality={modality} view={view} cohortGhost={populationGhosts[modality]} /><div className="frame-tag"><RefreshCw className="size-3.5" /> {loading ? 'Cargando fixture…' : `${fixture?.frames.length ?? 0} cuadros · ${fixture?.fps ?? '—'} fps`}</div></div>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400" aria-label="Leyenda del fantasma">
               <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-original" /> Fantasma original</span>
-              <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-population" /> Rango poblacional P10–P90</span>
-              <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-median" /> Mediana</span>
+              <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-population" /> Banda P10–P90</span>
+              <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-median" /> Mediana poblacional</span>
               {populationGhosts[modality] ? <span className="text-amber-200">n efectivo={populationGhosts[modality]?.population.nEffective}</span> : <span>Cargando cohorte…</span>}
             </div>
+            {populationGhosts[modality] ? <PopulationRangeCard modality={modality} cohort={populationGhosts[modality] as PopulationGhostFile} /> : null}
             <p className="mt-4 text-sm leading-6 text-slate-400">{reference.description}</p>
             {error ? <p className="mt-3 flex items-center gap-2 text-sm text-rose-300"><CircleAlert className="size-4" /> {error}</p> : null}
           </section>

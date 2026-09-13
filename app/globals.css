@@ -144,12 +144,17 @@
   .ghost-crank { fill: none; stroke: #64748b; stroke-width: 3; }
   .ghost-support-link { fill: none; stroke: #fbbf24; stroke-dasharray: 4 4; stroke-width: 3; }
   .ghost-support { fill: #fbbf24; stroke: #0b1016; stroke-width: 3; }
-  .ghost-population-band { fill: none; stroke: #fbbf24; stroke-linecap: round; stroke-linejoin: round; opacity: .2; }
-  .ghost-population-median { fill: none; stroke: #f59e0b; stroke-dasharray: 3 7; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; opacity: .95; }
+  .ghost-population-band { fill: none; stroke: #38bdf8; stroke-linecap: round; stroke-linejoin: round; opacity: .2; }
+  .ghost-population-median { fill: none; stroke: #a3e635; stroke-dasharray: 3 7; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; opacity: .95; }
+  .population-range-card { @apply mt-3 rounded-xl border border-sky-300/15 bg-sky-300/5 p-4; }
+  .population-range-track { @apply relative mt-4 h-2 rounded-full bg-slate-700/70; }
+  .population-range-fill { @apply absolute inset-y-0 left-0 right-0 rounded-full bg-sky-300/40; }
+  .population-range-marker { @apply absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#080d12] bg-sky-300; }
+  .population-range-marker-median { @apply size-4 bg-lime-300; }
   .legend-line { display: inline-block; width: 22px; height: 0; border-top: 3px solid currentColor; }
   .legend-line-original { color: #cbd5e1; }
-  .legend-line-population { height: 7px; border-top: 7px solid rgba(251,191,36,.35); }
-  .legend-line-median { color: #f59e0b; border-top-style: dashed; }
+  .legend-line-population { height: 7px; border-top: 7px solid rgba(56,189,248,.4); }
+  .legend-line-median { color: #a3e635; border-top-style: dashed; }
   .ghost-head { fill: #cbd5e1; stroke: #0b1016; stroke-width: 3; }
   .ghost-joint { fill: #bef264; stroke: #0b1016; stroke-width: 3; }
   .ghost-ground { stroke: #344454; stroke-dasharray: 7 6; stroke-width: 3; }
