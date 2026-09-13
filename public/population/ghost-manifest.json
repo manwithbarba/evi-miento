@@ -1,42 +1,140 @@
 {
   "id": "population-ghost-open-data",
-  "version": "2026-09-13.2",
+  "version": "2026-09-13.3",
   "status": "candidate",
   "activeInRecommendations": false,
-  "title": "Fantasmas poblacionales · datos abiertos procesados",
-  "description": "Índice de fuentes abiertas y dos agregados cohort-ghost reproducibles. Los agregados son referencias exploratorias y no constituyen una postura ideal ni una recomendación clínica.",
+  "title": "Fantasmas poblacionales · perfiles específicos",
+  "description": "Agregados cohort-ghost reproducibles, estratificados por contexto de carrera y ciclismo. Son referencias exploratorias y no constituyen una postura ideal ni una recomendación clínica.",
   "cohortGhosts": [
     {
-      "id": "cohort-ghost-running-rbds",
-      "title": "Running · RBDS · 3,5 m/s",
+      "id": "running-specialized-street-flat",
+      "profileId": "running_street_flat",
+      "shortTitle": "Calle · plano",
+      "title": "Running · calle/plano · proxy de cinta",
       "modality": "running",
-      "file": "/population/cohort-ghost-running.json",
+      "file": "/population/cohort-ghost-running-specialized.json",
+      "stratum": "street_flat",
       "nEffective": 39,
-      "scope": "Curva 0–100% del ciclo; mediana bilateral por participante y banda P10–P90.",
-      "metric": { "label": "Rodilla Z en contacto", "value": "11,0", "p10": "5,6", "p90": "18,7", "unit": "°" }
+      "evidenceLevel": "moderate",
+      "scope": "Curva 0–100%; RBDS a 3,5 m/s. Proxy de laboratorio para calle, no equivalente automático a superficie abierta.",
+      "metric": { "label": "Rodilla en contacto", "value": "11,0", "p10": "5,6", "p90": "18,7", "unit": "°" }
     },
     {
-      "id": "cohort-ghost-cycling-mendeley-setback",
-      "title": "Bike · setback e intensidad",
+      "id": "running-specialized-uphill-3",
+      "profileId": "running_trail_up_3",
+      "shortTitle": "Trail · subida 3°",
+      "title": "Running · trail/subida · 3°",
+      "modality": "running",
+      "file": "/population/cohort-ghost-running-specialized.json",
+      "stratum": "trail_uphill_3deg",
+      "nEffective": 18,
+      "evidenceLevel": "moderate",
+      "scope": "OSF/OpenSim; pendiente ascendente separada del plano y de la bajada; IC derecho y 101 fases.",
+      "metric": { "label": "Flexión de rodilla en IC", "value": "34,9", "p10": "28,1", "p90": "42,6", "unit": "°" }
+    },
+    {
+      "id": "running-specialized-uphill-6",
+      "profileId": "running_trail_up_6",
+      "shortTitle": "Trail · subida 6°",
+      "title": "Running · trail/subida · 6°",
+      "modality": "running",
+      "file": "/population/cohort-ghost-running-specialized.json",
+      "stratum": "trail_uphill_6deg",
+      "nEffective": 17,
+      "evidenceLevel": "moderate",
+      "scope": "OSF/OpenSim; pendiente ascendente de 6° en estrato independiente.",
+      "metric": { "label": "Flexión de rodilla en IC", "value": "37,9", "p10": "30,2", "p90": "45,9", "unit": "°" }
+    },
+    {
+      "id": "running-specialized-downhill-3",
+      "profileId": "running_trail_down_3",
+      "shortTitle": "Trail · bajada 3°",
+      "title": "Running · trail/bajada · 3°",
+      "modality": "running",
+      "file": "/population/cohort-ghost-running-specialized.json",
+      "stratum": "trail_downhill_3deg",
+      "nEffective": 19,
+      "evidenceLevel": "moderate",
+      "scope": "OSF/OpenSim; pendiente descendente separada del plano y de la subida.",
+      "metric": { "label": "Flexión de rodilla en IC", "value": "31,2", "p10": "24,6", "p90": "43,9", "unit": "°" }
+    },
+    {
+      "id": "running-specialized-downhill-6",
+      "profileId": "running_trail_down_6",
+      "shortTitle": "Trail · bajada 6°",
+      "title": "Running · trail/bajada · 6°",
+      "modality": "running",
+      "file": "/population/cohort-ghost-running-specialized.json",
+      "stratum": "trail_downhill_6deg",
+      "nEffective": 19,
+      "evidenceLevel": "moderate",
+      "scope": "OSF/OpenSim; pendiente descendente de 6° en estrato independiente.",
+      "metric": { "label": "Flexión de rodilla en IC", "value": "33,7", "p10": "24,3", "p90": "46,7", "unit": "°" }
+    },
+    {
+      "id": "cycling-specialized-road",
+      "profileId": "cycling_road",
+      "shortTitle": "Ruta",
+      "title": "Bike · ruta · posición registrada",
+      "modality": "cycling",
+      "file": "/population/cohort-ghost-cycling-specialized.json",
+      "stratum": "road",
+      "nEffective": 6,
+      "evidenceLevel": "low",
+      "scope": "BVH de Zenodo; ciclos detectados y normalizados a 101 fases; n pequeño y dos archivos excluidos por incompatibilidad de esqueleto.",
+      "metric": { "label": "Flexión de rodilla en contacto", "value": "72,8", "p10": "67,0", "p90": "76,4", "unit": "°" }
+    },
+    {
+      "id": "cycling-specialized-time-trial",
+      "profileId": "cycling_time_trial",
+      "shortTitle": "Contrarreloj",
+      "title": "Bike · contrarreloj · posición registrada",
+      "modality": "cycling",
+      "file": "/population/cohort-ghost-cycling-specialized.json",
+      "stratum": "time_trial",
+      "nEffective": 3,
+      "evidenceLevel": "low",
+      "scope": "BVH de Zenodo; se mantiene separado de ruta. n efectivo muy pequeño: sirve para prueba de interfaz, no para norma poblacional.",
+      "metric": { "label": "Flexión de rodilla en contacto", "value": "69,5", "p10": "64,8", "p90": "72,3", "unit": "°" }
+    },
+    {
+      "id": "cycling-general-mendeley",
+      "profileId": "cycling_general",
+      "shortTitle": "General · setback",
+      "title": "Bike · setback e intensidad · cohorte general",
       "modality": "cycling",
       "file": "/population/cohort-ghost-cycling.json",
+      "stratum": "overall",
       "nEffective": 32,
-      "scope": "Mediana de 6 condiciones por participante; P10–P90 entre participantes. El archivo reporta 34, la planilla descargable contiene 32.",
+      "evidenceLevel": "moderate",
+      "scope": "Mediana de 6 condiciones por participante; planilla de cicloergómetro, sin curva temporal 0–100%.",
       "metric": { "label": "Rango de flexión de rodilla", "value": "69,1", "p10": "62,7", "p90": "75,2", "unit": "°" }
     }
   ],
-  "sources": [
+  "indexedProfiles": [
     {
-      "id": "bath-50-runners-2023",
-      "title": "Full body kinematics and ground reaction forces of 50 heterogeneous runners",
+      "profileId": "running_trail_technical",
+      "title": "Running · trail técnico",
       "modality": "running",
-      "participants": 50,
-      "license": "CC BY 4.0",
-      "url": "https://researchdata.bath.ac.uk/1341/",
-      "data": "C3D con marcadores, fuerzas de reacción e IMU; 25 mujeres y 25 varones; varias velocidades y gradientes.",
-      "suitability": "Alta para ampliar un fantasma poblacional de running",
-      "limitation": "indexado, no procesado en esta versión: requiere armonizar velocidad, pendiente y protocolo."
+      "status": "indexed-only",
+      "reason": "Hay estudios road/trail y datasets de superficies, pero todavía no una cohorte abierta armonizada por terreno técnico, pendiente y fase comparable."
     },
+    {
+      "profileId": "cycling_mountain_bike",
+      "title": "Bike · MTB",
+      "modality": "cycling",
+      "status": "indexed-only",
+      "reason": "La evidencia compara ruta y MTB, pero los datos abiertos localizados no comparten todavía la misma cadena de marcadores y ciclo que el agregado bike publicado."
+    },
+    {
+      "profileId": "cycling_triathlon",
+      "title": "Bike · triatlón / transición",
+      "modality": "cycling",
+      "status": "indexed-only",
+      "reason": "La revisión de transición bicicleta→carrera justifica el perfil, pero no se incorpora una cohorte homogénea sin inventar valores."
+    }
+  ],
+  "sources": [
     {
       "id": "rbds-39-runners-2017",
       "title": "A public dataset of running biomechanics",
@@ -44,12 +142,73 @@
       "participants": 39,
       "nEffective": 39,
       "processingStatus": "processed",
-      "ghostFile": "/population/cohort-ghost-running.json",
+      "ghostFile": "/population/cohort-ghost-running-specialized.json",
       "license": "CC BY 4.0",
       "url": "https://doi.org/10.6084/m9.figshare.4543435",
-      "data": "Salidas procesadas de cinemática y cinética en cinta a 2,5, 3,5 y 4,5 m/s; fase normalizada a 101 puntos.",
+      "data": "Salidas procesadas en cinta a 2,5, 3,5 y 4,5 m/s; la versión visible usa 3,5 m/s como proxy de plano.",
       "suitability": "Alta para replicación y contraste de running",
-      "limitation": "muestra de laboratorio y métricas 3D; no es automáticamente equivalente a la captura 2D de la aplicación."
+      "limitation": "Muestra de laboratorio y métricas 3D; no es automáticamente equivalente a la captura 2D de la aplicación."
+    },
+    {
+      "id": "van-hooren-19-runners-2024",
+      "title": "Dataset of running kinematics, kinetics and muscle activation at different speeds and conditions",
+      "modality": "running",
+      "participants": 19,
+      "nEffective": 19,
+      "processingStatus": "processed",
+      "ghostFile": "/population/cohort-ghost-running-specialized.json",
+      "license": "CC BY 4.0",
+      "url": "https://osf.io/7qbxc",
+      "data": "C3D y salidas OpenSim; velocidades y gradientes de 3° y 6° con archivos de eventos.",
+      "suitability": "Muy alta para perfiles de running por pendiente",
+      "limitation": "Tres condiciones quedaron excluidas por eventos ausentes o no utilizables; trail técnico no está representado."
+    },
+    {
+      "id": "bath-50-runners-2023",
+      "title": "Full body kinematics and ground reaction forces of 50 heterogeneous runners",
+      "modality": "running",
+      "participants": 50,
+      "license": "CC BY 4.0",
+      "url": "https://researchdata.bath.ac.uk/1341/",
+      "data": "C3D con marcadores, fuerzas de reacción e IMU; 25 mujeres y 25 varones; velocidades y gradientes.",
+      "suitability": "Muy alta para ampliar un fantasma poblacional de running",
+      "limitation": "Indexado, no procesado en esta versión: requiere armonizar velocidad, pendiente y protocolo."
+    },
+    {
+      "id": "figshare-plus-1798",
+      "title": "A Biomechanical Dataset of 1,798 Healthy and Injured Subjects",
+      "modality": "running",
+      "participants": 1798,
+      "license": "licencia visible en el registro",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11564798/",
+      "data": "Kinemática de marcha y running en cinta con metadatos de población y estado de lesión.",
+      "suitability": "Muy alta para un fantasma estratificado por población",
+      "limitation": "Indexado, no procesado; requiere comparabilidad y gobernanza antes de usarlo como referencia."
+    },
+    {
+      "id": "open-5k-20-runners",
+      "title": "Open dataset · 20 recreational runners before and after 5 km",
+      "modality": "running",
+      "participants": 20,
+      "license": "CC BY 4.0",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9668536/",
+      "data": "C3D y MAT procesados para contrastar cambios agudos alrededor de una carrera de 5 km.",
+      "suitability": "Útil para un perfil de fatiga o pre/post esfuerzo",
+      "limitation": "Indexado, no incorporado al fantasma base; el diseño pre/post no debe mezclarse con una referencia transversal."
+    },
+    {
+      "id": "zenodo-cyclists-mocap-2024",
+      "title": "Dataset of Motion Capture of Cyclists",
+      "modality": "cycling",
+      "participants": 11,
+      "nEffective": 9,
+      "processingStatus": "processed",
+      "ghostFile": "/population/cohort-ghost-cycling-specialized.json",
+      "license": "dataset abierto · verificar términos",
+      "url": "https://zenodo.org/records/10668611",
+      "data": "BVH, C3D y GPX de ciclismo de ruta y contrarreloj; se procesaron los BVH compatibles.",
+      "suitability": "Alta para una prueba de perfiles ruta/contrarreloj",
+      "limitation": "n efectivo pequeño y dos esqueletos no compatibles con la cadena bilateral; no hay cohorte específica de triatlón o MTB."
     },
     {
       "id": "mendeley-34-cyclists-2025",
@@ -61,42 +220,86 @@
       "ghostFile": "/population/cohort-ghost-cycling.json",
       "license": "CC BY 4.0",
       "url": "https://data.mendeley.com/datasets/tvnwnzy8vm/1",
-      "data": "Planilla de 192 condiciones observadas: tres posiciones de setback y dos intensidades; cinemática de miembros inferiores y cadencia.",
+      "data": "Planilla de 192 condiciones: tres posiciones de setback y dos intensidades.",
       "suitability": "Alta para una cohorte exploratoria de bike",
-      "limitation": "el artículo informa 34, pero la planilla descargable contiene 32 participantes completos; protocolo de cicloergómetro y salida 3D."
+      "limitation": "El artículo informa 34, pero la planilla contiene 32 participantes completos; protocolo de cicloergómetro."
     },
     {
-      "id": "van-hooren-19-runners-2024",
-      "title": "Dataset of running kinematics, kinetics and muscle activation at different speeds and conditions",
-      "modality": "running",
-      "participants": 19,
-      "license": "CC BY 4.0",
-      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11737525/",
-      "data": "C3D y datos procesados con OpenSim para 13 condiciones de velocidad, pendiente, cadencia y flexión de tronco.",
-      "suitability": "Muy alta para ampliar condiciones de running",
-      "limitation": "indexado, no procesado aquí; requiere un adaptador OpenSim y una política de estratificación por condición."
-    },
-    {
-      "id": "figshare-plus-1798",
-      "title": "A Biomechanical Dataset of 1,798 Healthy and Injured Subjects",
-      "modality": "running",
-      "participants": 1798,
-      "license": "licencia visible en el registro",
-      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11564798/",
-      "data": "Kinemática de marcha y running en cinta con metadatos de edad, sexo, historial y estado de lesión.",
-      "suitability": "Muy alta para un fantasma estratificado por población",
-      "limitation": "indexado, no procesado aquí; necesita definir comparabilidad y gobernanza de datos antes de usarlo como referencia."
-    },
-    {
-      "id": "zenodo-cyclists-mocap-2024",
-      "title": "Dataset of Motion Capture of Cyclists",
+      "id": "cycling-position-review-2024",
+      "title": "Cycling position optimisation · systematic review",
       "modality": "cycling",
       "participants": null,
-      "license": "dataset abierto · verificar términos",
-      "url": "https://doi.org/10.5281/zenodo.10668611",
-      "data": "C3D, BVH y GPX de ciclismo de ruta y contrarreloj, con posiciones cómoda, agresiva y aero.",
-      "suitability": "Muy útil para ampliar condiciones posturales de bike",
-      "limitation": "indexado, no procesado: volumen declarado de 78,6 GB; hay que auditar n y seleccionar un subconjunto."
+      "license": "revisión sistemática",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39285616/",
+      "data": "Revisión de 47 estudios completos sobre variables posicionales, biomecánica y fisiología; reporta heterogeneidad y calidad metodológica mayormente baja.",
+      "suitability": "Alta para definir variables y límites de interpretación",
+      "limitation": "No es una cohorte de referencia y no sustituye datos estratificados por disciplina."
+    },
+    {
+      "id": "running-grade-review-2016",
+      "title": "Biomechanics and Physiology of Uphill and Downhill Running",
+      "modality": "running",
+      "participants": null,
+      "license": "revisión sistemática",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/27501719/",
+      "data": "Revisión de cambios de paso, tiempo de apoyo y trabajo articular con la pendiente.",
+      "suitability": "Alta para justificar estratos de subida y bajada",
+      "limitation": "La evidencia agrega protocolos heterogéneos y no describe por sí sola trail técnico."
+    },
+    {
+      "id": "running-treadmill-overground-review-2019",
+      "title": "Running biomechanics · treadmill versus overground systematic review",
+      "modality": "running",
+      "participants": null,
+      "license": "revisión sistemática",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/31802395/",
+      "data": "Revisión para calibrar cuánto puede transferirse una medición de cinta a superficie abierta.",
+      "suitability": "Alta para etiquetar el perfil calle/plano como proxy",
+      "limitation": "No valida una equivalencia universal entre cinta y calle."
+    },
+    {
+      "id": "triathlon-bike-run-review-2022",
+      "title": "Running after cycling and cycling-to-running transition · systematic review",
+      "modality": "cycling",
+      "participants": null,
+      "license": "revisión sistemática",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35871903/",
+      "data": "Revisión sobre implicancias biomecánicas y fisiológicas de la transición bicicleta→carrera.",
+      "suitability": "Alta para diseñar un futuro fantasma de triatlón de transición",
+      "limitation": "No se incorporó como cohorte porque no ofrece aquí un dataset poblacional homogéneo procesable."
+    },
+    {
+      "id": "road-trail-runners-2022",
+      "title": "Elite road versus trail runners",
+      "modality": "running",
+      "participants": 17,
+      "license": "artículo con datos de estudio",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36515604/",
+      "data": "Compara economía, biomecánica, fuerza y potencia entre corredores de ruta y trail.",
+      "suitability": "Alta para justificar perfiles road/trail",
+      "limitation": "Muestra pequeña y de atletas élite; no se debe generalizar como fantasma poblacional amplio."
+    },
+    {
+      "id": "road-mtb-posture-2015",
+      "title": "Road cycling and mountain biking · spine and hamstring adaptations",
+      "modality": "cycling",
+      "participants": 60,
+      "license": "artículo con datos de estudio",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26509372/",
+      "data": "Compara ciclistas de ruta, MTB cross-country y controles en curvatura espinal, inclinación de tronco y pelvis.",
+      "suitability": "Alta para planear el perfil MTB",
+      "limitation": "Indexado y no incorporado: la métrica no es directamente la misma que la curva de pedaleo de Zenodo."
+    },
+    {
+      "id": "step-width-open-dataset-2025",
+      "title": "Running step width · open biomechanics dataset",
+      "modality": "running",
+      "participants": 13,
+      "license": "registro abierto del artículo",
+      "url": "https://www.nature.com/articles/s41597-025-05113-6",
+      "data": "C3D, TRC, MOT y CSV con distintas anchuras de paso y velocidades.",
+      "suitability": "Alta para ampliar el plano frontal",
+      "limitation": "Muestra pequeña, masculina y de laboratorio; indexado para una siguiente iteración."
     },
     {
       "id": "simtk-cycling-sim",
@@ -105,10 +308,10 @@
       "participants": 16,
       "license": "términos del proyecto",
       "url": "https://simtk.org/projects/cycling_sim",
-      "data": "Modelos OpenSim, trayectorias de marcadores, fuerzas del pedal y simulaciones músculo-esqueléticas.",
-      "suitability": "Alta para validar variables mecánicas y modelos",
-      "limitation": "indexado, no procesado; no representa por sí solo una cohorte poblacional de ajustes."
+      "data": "Modelos OpenSim, marcadores, fuerzas de pedal y simulaciones músculo-esqueléticas.",
+      "suitability": "Alta para validar variables mecánicas y futuros perfiles",
+      "limitation": "Indexado, no procesado; no representa por sí solo una cohorte poblacional de ajustes."
     }
   ],
-  "nextStep": "Resuelto en esta versión: se descargaron y procesaron salidas públicas de running y bike; se normalizaron unidades y fase cuando existía; se auditó calidad por participante; y se publicaron agregados cohort-ghost con mediana, P10–P90, n efectivo y exclusiones. Las fuentes restantes quedan enlazadas para futuras ampliaciones, sin presentarlas como procesadas."
+  "nextStep": "Procesado y publicado: perfiles específicos de running (calle/plano, subida 3° y 6°, bajada 3° y 6°) y bike (ruta y contrarreloj), con mediana, P10–P90, n efectivo y exclusiones visibles. Triatlón, MTB y trail técnico quedan enlazados como líneas futuras porque todavía no hay una cohorte abierta comparable procesada en esta versión."
 }

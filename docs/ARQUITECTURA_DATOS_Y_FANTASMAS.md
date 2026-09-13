@@ -30,11 +30,12 @@ La aplicación actual es local-first: guarda la última línea base en
 romper ese modo de uso ni exigir subir el video.
 
 La ruta pública `/ghost/` sirve como laboratorio de QA. Carga los fixtures
-sintéticos, el índice de fuentes abiertas y los agregados
-`public/population/cohort-ghost-running.json` y
-`public/population/cohort-ghost-cycling.json`. Estos últimos ya contienen
-mediana, P10–P90, n efectivo y auditoría de exclusiones, pero siguen fuera de
-las recomendaciones automáticas.
+sintéticos, el índice de fuentes abiertas y los agregados generales y
+específicos. El selector separa calle/plano, subida y bajada en running, y
+ruta, contrarreloj y cohorte general de setback en bike. Cada capa se dibuja
+sobre el mismo fantasma humano de dos miembros inferiores: la banda azul es
+P10–P90 y la línea discontinua verde es la mediana. La capa es una proyección
+visual de métricas, no una nube de coordenadas articulares observadas.
 
 ## Flujo de incorporación
 
@@ -74,18 +75,23 @@ antes que un promedio único.
 - Las métricas de carrera y bike deben estratificarse por tarea y contexto; no
   se debe mezclar, por ejemplo, carrera a distintas velocidades o posiciones de
   ciclismo sin declararlo.
+- Los perfiles específicos no deben confundirse con la disciplina completa:
+  `trail` de laboratorio con pendiente no equivale a trail técnico, y ruta o
+  contrarreloj no equivalen a triatlón. Si no hay una cohorte comparable, se
+  conserva el enlace como fuente indexada y no se fabrica un fantasma.
 - Las diferencias del fantasma son controles del algoritmo, no alertas de
   lesión. El feedback experimental debe incluir tolerancia, confort y capacidad
   de volver a la versión anterior.
 - Todo agregado publicado conserva la versión previa y su reporte de calidad.
 
-La primera corrida reproducible está en
-`scripts/process_population_ghosts.py`. Procesa en paralelo el RBDS de running
-y la planilla pública de bike, estratifica las velocidades/condiciones, no
-mezcla fases incompatibles y deja el informe en
-`public/population/cohort-ghost-quality.md`. En RBDS se obtuvieron n efectivos
-31, 39 y 31 para 2,5, 3,5 y 4,5 m/s; en bike se observaron 32 participantes
-completos de los 34 informados por el artículo.
+Las corridas reproducibles están en `scripts/process_population_ghosts.py` y
+`scripts/process_specialized_ghosts.py`. La segunda procesa en paralelo
+conceptual los dos dominios de fuente: OSF/OpenSim para los perfiles de
+running y BVH de Zenodo para ruta/contrarreloj. Publica sólo agregados compactos
+en `public/population/`, junto con `specialized-ghost-quality.md`. La cohorte
+running específica tiene n efectivos 18–19 por gradiente; la cohorte bike tiene
+n efectivo 6 en ruta y 3 en contrarreloj. Las exclusiones y el faltante de
+eventos quedan visibles en el reporte, no se imputan.
 
 ## Respaldo operativo
 

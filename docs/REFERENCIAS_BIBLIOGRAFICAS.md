@@ -53,6 +53,19 @@ Selección de revisiones sistemáticas y revisiones paraguas consultadas el
   variables de carga; los efectos dependen del protocolo y la retención.
   [Revisión 2023](https://pubmed.ncbi.nlm.nih.gov/36791728/) ·
   [Revisión 2024](https://pubmed.ncbi.nlm.nih.gov/38967313/).
+- Vernillo, G., et al. (2016). *Biomechanics and Physiology of Uphill and
+  Downhill Running*. La pendiente cambia frecuencia de paso, tiempo de apoyo,
+  fase aérea y trabajo articular; por eso los perfiles de subida y bajada no
+  se mezclan con el plano.
+  [PubMed](https://pubmed.ncbi.nlm.nih.gov/27501719/) · PMID 27501719.
+- *Running biomechanics on a treadmill versus overground* (2019). Revisión
+  sistemática que obliga a etiquetar el perfil de cinta como proxy y no como
+  equivalente universal de calle.
+  [PubMed](https://pubmed.ncbi.nlm.nih.gov/31802395/) · PMID 31802395.
+- *Elite road versus trail runners* (2022). Compara economía, biomecánica,
+  fuerza y potencia en 17 atletas; respalda explorar perfiles road/trail,
+  pero su tamaño y selección no permiten generalizar un fantasma poblacional.
+  [PubMed](https://pubmed.ncbi.nlm.nih.gov/36515604/) · PMID 36515604.
 
 ## Bike fitting
 
@@ -80,6 +93,39 @@ Selección de revisiones sistemáticas y revisiones paraguas consultadas el
   críticamente baja; los resultados sobre sillín, dolor y rendimiento son
   conflictivos.
   [Physiologia](https://www.mdpi.com/2673-9488/4/4/32).
+- *Running after cycling and cycling-to-running transition* (2022). Revisión
+  sistemática que justifica un futuro perfil de triatlón de transición, porque
+  correr después de pedalear no es la misma tarea que correr aislado.
+  [PubMed](https://pubmed.ncbi.nlm.nih.gov/35871903/) · PMID 35871903.
+- *Road Cycling and Mountain Biking Produces Adaptations on the Spine and
+  Hamstring Extensibility* (2015). Estudio con 30 ciclistas de ruta, 30 de MTB
+  cross-country y 30 controles; aporta base para un perfil MTB específico,
+  pero aquí queda indexado hasta procesar variables comparables.
+  [PubMed](https://pubmed.ncbi.nlm.nih.gov/26509372/) · PMID 26509372.
+
+## Datos abiertos incorporados e indexados
+
+- **Procesado en esta versión:** RBDS de 39 corredores
+  ([Figshare](https://figshare.com/articles/dataset/A_comprehensive_public_data_set_of_running_biomechanics_and_the_effects_of_running_speed_on_lower_extremity_kinematics_and_kinetics/4543435)),
+  dataset de 19 corredores con salidas OpenSim y gradientes
+  ([OSF](https://osf.io/7qbxc)), y captura de ciclistas de ruta/contrarreloj
+  ([Zenodo](https://zenodo.org/records/10668611)).
+- **Indexados para ampliación:** cohorte abierta de 50 corredores con C3D,
+  fuerzas e IMU ([University of Bath](https://researchdata.bath.ac.uk/1341/));
+  dataset de 20 corredores antes/después de 5 km
+  ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9668536/)); dataset de
+  anchura de paso con C3D/TRC/MOT/CSV
+  ([Scientific Data](https://www.nature.com/articles/s41597-025-05113-6));
+  dataset biomecánico de 1.798 sujetos
+  ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC11564798/)); y modelos
+  músculo-esqueléticos de ciclismo
+  ([SimTK](https://simtk.org/projects/cycling_sim)).
+- **Decisión de pertinencia:** hay evidencia suficiente para separar
+  calle/plano, pendientes, ruta y contrarreloj como candidatos exploratorios.
+  No hay todavía una base abierta homogénea que justifique publicar como
+  “poblacional” un fantasma específico de triatlón, MTB o trail técnico; esos
+  enlaces quedan visibles en el manifiesto y se incorporarán sólo con
+  normalización, auditoría y n efectivo verificable.
 
 ## Lectura metodológica
 

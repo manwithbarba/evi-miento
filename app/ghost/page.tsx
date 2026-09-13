@@ -36,10 +36,14 @@ interface PopulationSource {
 
 interface CohortGhostSummary {
   id: string;
+  profileId?: string;
+  shortTitle?: string;
   title: string;
   modality: GhostModality;
   file: string;
   nEffective: number;
+  evidenceLevel?: 'high' | 'moderate' | 'low';
+  stratum?: string;
   scope: string;
   metric: { label: string; value: string; p10: string; p90: string; unit: string };
 }
@@ -53,6 +57,7 @@ interface PopulationGhostManifest {
   description: string;
   sources: PopulationSource[];
   cohortGhosts: CohortGhostSummary[];
+  indexedProfiles?: Array<{ profileId: string; title: string; modality: GhostModality; status: string; reason: string }>;
   nextStep: string;
 }
 
@@ -78,6 +83,7 @@ interface PopulationStratum {
 }
 
 interface PopulationGhostFile {
+  schemaVersion?: string;
   modality: GhostModality;
   defaultStratum: string;
   population: { nEffective: number };
@@ -104,11 +110,11 @@ function assetPath(path: string) {
 function populationMetric(cohort: PopulationGhostFile, modality: GhostModality) {
   const stratum = cohort.strata[cohort.defaultStratum];
   const metric = modality === 'running'
-    ? stratum?.participantSummaries?.kneeAngleZAtContact
-    : stratum?.metrics?.kneeFlexionRangeDeg;
+    ? stratum?.participantSummaries?.kneeFlexionAtContact ?? stratum?.participantSummaries?.kneeAngleZAtContact
+    : stratum?.participantSummaries?.kneeFlexionAtContact ?? stratum?.metrics?.kneeFlexionRangeDeg;
   if (!stratum || !metric) return null;
   return {
-    label: modality === 'running' ? 'Rodilla en contacto' : 'Rango de flexión de rodilla',
+    label: modality === 'running' && stratum.participantSummaries?.kneeFlexionAtContact ? 'Flexión de rodilla en contacto' : modality === 'running' ? 'Rodilla Z en contacto' : 'Rango de flexión de rodilla',
     ...metric,
     nEffective: stratum.nEffective,
     stratumLabel: stratum.label,
@@ -216,15 +222,27 @@ function metricValue(value: number, unit: string) {
 export default function GhostLabPage() {
   const [modality, setModality] = useState<GhostModality>('running');
   const [view, setView] = useState<GhostView>('sagittal');
+  const [profileId, setProfileId] = useState('running_street_flat');
   const [fixture, setFixture] = useState<GhostFixture | null>(null);
   const [population, setPopulation] = useState<PopulationGhostManifest | null>(null);
-  const [populationGhosts, setPopulationGhosts] = useState<Partial<Record<GhostModality, PopulationGhostFile>>>({});
+  const [populationGhosts, setPopulationGhosts] = useState<Record<string, PopulationGhostFile>>({});
   const [loadedFixtureUrl, setLoadedFixtureUrl] = useState<string | null>(null);
   const [populationLoading, setPopulationLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const reference = GHOST_REFERENCES[modality];
   const fixtureUrl = useMemo(() => assetPath(FIXTURES[modality][view]), [modality, view]);
+  const profileOptions = useMemo(
+    () => population?.cohortGhosts.filter((cohort) => cohort.modality === modality) ?? [],
+    [modality, population],
+  );
+  const selectedProfile = profileOptions.find((cohort) => (cohort.profileId ?? cohort.id) === profileId) ?? profileOptions[0];
+  const selectedPopulationGhost = selectedProfile
+    ? (() => {
+      const cohort = populationGhosts[selectedProfile.file];
+      return cohort && selectedProfile.stratum ? { ...cohort, defaultStratum: selectedProfile.stratum } : cohort;
+    })()
+    : undefined;
 
   useEffect(() => {
     let cancelled = false;
@@ -253,27 +271,19 @@ export default function GhostLabPage() {
     let cancelled = false;
     fetch(assetPath('/population/ghost-manifest.json'))
       .then((response) => response.json() as Promise<PopulationGhostManifest>)
-      .then((data) => { if (!cancelled) setPopulation(data); })
+      .then(async (data) => {
+        if (cancelled) return;
+        setPopulation(data);
+        const files = [...new Set(data.cohortGhosts.map((cohort) => cohort.file))];
+        const entries = await Promise.all(files.map(async (file) => {
+          const response = await fetch(assetPath(file));
+          if (!response.ok) throw new Error(`No se pudo cargar ${file}`);
+          return [file, await response.json() as PopulationGhostFile] as const;
+        }));
+        if (!cancelled) setPopulationGhosts(Object.fromEntries(entries));
+      })
       .catch(() => { if (!cancelled) setPopulation(null); })
       .finally(() => { if (!cancelled) setPopulationLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const files: Record<GhostModality, string> = {
-      running: assetPath('/population/cohort-ghost-running.json'),
-      cycling: assetPath('/population/cohort-ghost-cycling.json'),
-    };
-    Promise.all(Object.entries(files).map(async ([modality, url]) => {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`No se pudo cargar ${url}`);
-      return [modality as GhostModality, await response.json() as PopulationGhostFile] as const;
-    }))
-      .then((entries) => {
-        if (!cancelled) setPopulationGhosts(Object.fromEntries(entries) as Partial<Record<GhostModality, PopulationGhostFile>>);
-      })
-      .catch(() => { if (!cancelled) setPopulationGhosts({}); });
     return () => { cancelled = true; };
   }, []);
 
@@ -307,21 +317,33 @@ export default function GhostLabPage() {
 
             <fieldset className="mt-5 flex flex-wrap gap-2">
               <legend className="sr-only">Modalidad y plano de cámara</legend>
-              <button type="button" onClick={() => setModality('running')} className={`ghost-toggle ${modality === 'running' ? 'ghost-toggle-active' : ''}`}><Footprints className="size-4" /> Running</button>
-              <button type="button" onClick={() => setModality('cycling')} className={`ghost-toggle ${modality === 'cycling' ? 'ghost-toggle-active' : ''}`}><Bike className="size-4" /> Bike</button>
+              <button type="button" onClick={() => { setModality('running'); setProfileId('running_street_flat'); }} className={`ghost-toggle ${modality === 'running' ? 'ghost-toggle-active' : ''}`}><Footprints className="size-4" /> Running</button>
+              <button type="button" onClick={() => { setModality('cycling'); setProfileId('cycling_road'); }} className={`ghost-toggle ${modality === 'cycling' ? 'ghost-toggle-active' : ''}`}><Bike className="size-4" /> Bike</button>
               <span className="mx-1 hidden w-px bg-white/10 sm:block" />
               <button type="button" onClick={() => setView('sagittal')} className={`ghost-toggle ${view === 'sagittal' ? 'ghost-toggle-active' : ''}`}>Lateral</button>
               <button type="button" onClick={() => setView('frontal')} className={`ghost-toggle ${view === 'frontal' ? 'ghost-toggle-active' : ''}`}>Frontal</button>
             </fieldset>
 
-            <div className="ghost-stage mt-5"><GhostSketch modality={modality} view={view} cohortGhost={populationGhosts[modality]} /><div className="frame-tag"><RefreshCw className="size-3.5" /> {loading ? 'Cargando fixture…' : `${fixture?.frames.length ?? 0} cuadros · ${fixture?.fps ?? '—'} fps`}</div></div>
+            <fieldset className="mt-3 rounded-xl border border-white/8 bg-white/[.02] p-3">
+              <legend className="px-1 text-[11px] uppercase tracking-[0.12em] text-slate-500">Perfil poblacional</legend>
+              <div className="flex flex-wrap gap-2">
+                {profileOptions.map((profile) => {
+                  const key = profile.profileId ?? profile.id;
+                  return <button key={profile.id} type="button" onClick={() => setProfileId(key)} className={`ghost-profile-toggle ${key === (selectedProfile?.profileId ?? selectedProfile?.id) ? 'ghost-profile-toggle-active' : ''}`}><span>{profile.shortTitle ?? profile.title}</span><span className="ghost-profile-n">n={profile.nEffective}</span></button>;
+                })}
+              </div>
+              {selectedProfile ? <p className="mt-2 text-xs leading-5 text-slate-500">{selectedProfile.scope} Nivel de evidencia: {selectedProfile.evidenceLevel ?? 'exploratorio'}.</p> : null}
+              {population?.indexedProfiles?.filter((profile) => profile.modality === modality).map((profile) => <p key={profile.profileId} className="mt-2 text-xs leading-5 text-amber-200/75">En estudio, sin valores publicados: {profile.title}. {profile.reason}</p>)}
+            </fieldset>
+
+            <div className="ghost-stage mt-5"><GhostSketch modality={modality} view={view} cohortGhost={selectedPopulationGhost} /><div className="frame-tag"><RefreshCw className="size-3.5" /> {loading ? 'Cargando fixture…' : `${fixture?.frames.length ?? 0} cuadros · ${fixture?.fps ?? '—'} fps`}</div></div>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400" aria-label="Leyenda del fantasma">
               <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-original" /> Fantasma original</span>
               <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-population" /> Banda P10–P90</span>
               <span className="inline-flex items-center gap-2"><i className="legend-line legend-line-median" /> Mediana poblacional</span>
-              {populationGhosts[modality] ? <span className="text-amber-200">n efectivo={populationGhosts[modality]?.population.nEffective}</span> : <span>Cargando cohorte…</span>}
+              {selectedPopulationGhost ? <span className="text-amber-200">n efectivo={selectedPopulationGhost.strata[selectedPopulationGhost.defaultStratum]?.nEffective ?? selectedPopulationGhost.population.nEffective}</span> : <span>Cargando cohorte…</span>}
             </div>
-            {populationGhosts[modality] ? <PopulationRangeCard modality={modality} cohort={populationGhosts[modality] as PopulationGhostFile} /> : null}
+            {selectedPopulationGhost ? <PopulationRangeCard modality={modality} cohort={selectedPopulationGhost} /> : null}
             <p className="mt-4 text-sm leading-6 text-slate-400">{reference.description}</p>
             {error ? <p className="mt-3 flex items-center gap-2 text-sm text-rose-300"><CircleAlert className="size-4" /> {error}</p> : null}
           </section>
@@ -351,6 +373,7 @@ export default function GhostLabPage() {
                 <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-[0.12em] text-lime-200">{cohort.modality === 'running' ? 'Running' : 'Bike'}</p><h3 className="mt-1 font-medium text-white">{cohort.title}</h3></div><span className="shrink-0 rounded-full bg-white/8 px-2 py-1 text-xs text-lime-100">n efectivo={cohort.nEffective}</span></div>
                 <p className="mt-3 text-sm text-slate-300">{cohort.metric.label}: <strong className="text-lime-100">mediana {cohort.metric.value}{cohort.metric.unit}</strong> · P10–P90 {cohort.metric.p10}{cohort.metric.unit}–{cohort.metric.p90}{cohort.metric.unit}</p>
                 <p className="mt-2 text-xs leading-5 text-slate-400">{cohort.scope}</p>
+                <p className="mt-2 text-xs text-slate-500">Nivel de evidencia: {cohort.evidenceLevel ?? 'exploratorio'}.</p>
                 <a className="source-chip mt-4 inline-block text-xs" href={assetPath(cohort.file)} target="_blank" rel="noreferrer">Respaldo de datos · mediana / P10–P90</a>
               </article>
             ))}
@@ -364,7 +387,7 @@ export default function GhostLabPage() {
               </article>
             ))}
           </div>
-          <div className="mt-5 flex items-start gap-3 rounded-xl border border-lime-300/15 bg-lime-300/5 p-4 text-sm leading-6 text-slate-300"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-lime-200" /><p><strong className="text-lime-100">Estado de esta versión:</strong> {population?.nextStep ?? 'los agregados poblacionales están incorporados como candidatos exploratorios.'} <a className="ml-1 text-lime-200 underline" href={assetPath('/population/cohort-ghost-quality.md')} target="_blank" rel="noreferrer">Ver reporte de exclusiones</a></p></div>
+          <div className="mt-5 flex items-start gap-3 rounded-xl border border-lime-300/15 bg-lime-300/5 p-4 text-sm leading-6 text-slate-300"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-lime-200" /><p><strong className="text-lime-100">Estado de esta versión:</strong> {population?.nextStep ?? 'los agregados poblacionales están incorporados como candidatos exploratorios.'} <a className="ml-1 text-lime-200 underline" href={assetPath('/population/specialized-ghost-quality.md')} target="_blank" rel="noreferrer">Ver auditoría de exclusiones</a> · <a className="text-lime-200 underline" href={assetPath('/population/ghost-manifest.json')} target="_blank" rel="noreferrer">Ver manifiesto</a></p></div>
         </section>
 
         <footer className="mt-6 text-xs leading-5 text-slate-600">Evi Miento · página de QA pública · los fantasmas poblacionales no se usan para recomendar ajustes automáticamente.</footer>

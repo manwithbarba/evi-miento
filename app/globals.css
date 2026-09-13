@@ -133,6 +133,15 @@
   .ghost-toggle-active {
     @apply border-lime-300/35 bg-lime-300/10 text-lime-100;
   }
+  .ghost-profile-toggle {
+    @apply inline-flex items-center gap-2 rounded-lg border border-white/8 bg-black/10 px-2.5 py-2 text-xs text-slate-400 transition-colors hover:border-sky-300/30 hover:text-sky-100;
+  }
+  .ghost-profile-toggle-active {
+    @apply border-sky-300/40 bg-sky-300/10 text-sky-100;
+  }
+  .ghost-profile-n {
+    @apply rounded-full bg-white/8 px-1.5 py-0.5 font-mono text-[10px] text-amber-200;
+  }
   .ghost-stage {
     @apply relative overflow-hidden rounded-xl border border-white/8 bg-[#080d12] p-4;
     background-image: radial-gradient(circle at center, rgba(190,242,100,.055), transparent 62%);
