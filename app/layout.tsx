@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Movimiento · Análisis biomecánico deportivo',
+  title: 'Evi Miento · Evidencia en movimiento',
   description: 'Analizá un video lateral de ciclismo o carrera, medí ángulos y documentá cada ajuste.',
 };
 

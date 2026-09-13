@@ -40,6 +40,11 @@ export interface RunningRecommendation {
   status: 'optimal' | 'attention' | 'caution';
 }
 
+export interface RunningRecommendationContext {
+  /** Línea base aceptada por el atleta; no es una norma poblacional. */
+  baselineCadenceSpm?: number;
+}
+
 // ---------------------------------------------------------------------------
 // Geometry helpers
 // ---------------------------------------------------------------------------
@@ -286,77 +291,57 @@ export function summarizeRunningFrames(
 
 export function buildRunningRecommendations(
   metrics: RunningAnalysisSummary,
+  context: RunningRecommendationContext = {},
 ): RunningRecommendation[] {
   const recs: RunningRecommendation[] = [];
 
-  // Cadencia
-  if (metrics.cadenceSpm < 160 && metrics.overstridingIndex > 0.15) {
-    recs.push({
-      status: 'caution',
-      title: 'Cadencia baja con sobrezancada',
-      detail: `Cadencia actual: ${metrics.cadenceSpm} SPM. Probá incrementar un 5% (≈${Math.round(metrics.cadenceSpm * 1.05)} SPM) usando un metrónomo. Acortar la zancada reduce las fuerzas de frenado al contacto.`,
-    });
-  } else if (metrics.cadenceSpm < 160) {
-    recs.push({
-      status: 'attention',
-      title: 'Cadencia por debajo de 160 SPM',
-      detail: `Cadencia actual: ${metrics.cadenceSpm} SPM. Una cadencia moderadamente baja no es necesariamente un problema si el patrón de contacto es eficiente. Considerar incrementar solo si se combina con molestias.`,
-    });
-  } else if (metrics.cadenceSpm > 200) {
+  // Cadencia: sólo se sugiere experimentar si existe una línea base individual.
+  const baseline = context.baselineCadenceSpm;
+  const cadenceDifference = baseline && baseline > 0
+    ? Math.abs(metrics.cadenceSpm - baseline) / baseline
+    : 0;
+  if (baseline && cadenceDifference > 0.05) {
+    const direction = metrics.cadenceSpm > baseline ? 'por encima' : 'por debajo';
     recs.push({
       status: 'attention',
-      title: 'Cadencia alta',
-      detail: `Cadencia actual: ${metrics.cadenceSpm} SPM. Verificar que la eficiencia metabólica no esté comprometida; una cadencia excesiva puede incrementar el costo cardiorrespiratorio.`,
+      title: 'Cadencia diferente de tu línea base',
+      detail: `Cadencia actual: ${metrics.cadenceSpm} SPM, ${direction} de tu línea base (${baseline} SPM). Si querés probar un cambio, hacelo de forma gradual —por ejemplo ±5%— y conservá sólo lo que mejore confort y control.`,
     });
   } else {
     recs.push({
       status: 'optimal',
-      title: 'Cadencia dentro de rango funcional',
-      detail: `Cadencia actual: ${metrics.cadenceSpm} SPM (rango 160–200 SPM).`,
+      title: 'Cadencia observada',
+      detail: `Cadencia actual: ${metrics.cadenceSpm} SPM. No se aplica un rango óptimo universal; guardá una sesión cómoda como línea base para futuras comparaciones.`,
     });
   }
 
-  // Patrón de contacto + rodilla en IC
+  // Patrón de contacto + rodilla en IC: describe redistribución de cargas.
   if (metrics.footStrikeType === 'rearfoot' && metrics.kneeFlexionAtContactDeg < 15) {
     recs.push({
-      status: 'caution',
-      title: 'Aterrizaje de talón con rodilla extendida',
-      detail: 'La combinación de retropié marcado y rodilla casi bloqueada en el contacto inicial genera fuerzas de frenado elevadas. Trabajar skipping y propioceptivos de contacto.',
+      status: 'attention',
+      title: 'Contacto de retropié con poca flexión',
+      detail: 'Esta combinación puede modificar las cargas de frenado en el contacto. No es un diagnóstico: si se prueba feedback o reentrenamiento, hacelo gradualmente y controlá respuesta y molestias.',
     });
   } else if (metrics.footStrikeType === 'rearfoot') {
     recs.push({
-      status: 'attention',
+      status: 'optimal',
       title: 'Patrón de retropié',
-      detail: `Ángulo de contacto: ${metrics.footStrikeAngleDeg}°. No es necesariamente ineficiente si la cadencia es adecuada y no hay molestias.`,
+      detail: `Ángulo de contacto: ${metrics.footStrikeAngleDeg}°. El patrón de apoyo no es bueno o malo por sí solo: un cambio puede redistribuir cargas hacia otras estructuras.`,
     });
   } else {
     recs.push({
       status: 'optimal',
-      title: `Patrón de ${metrics.footStrikeType === 'midfoot' ? 'mediopié' : 'antepié'}`,
-      detail: `Ángulo de contacto: ${metrics.footStrikeAngleDeg}°.`,
+      title: `Patrón de ${metrics.footStrikeType === 'midfoot' ? 'mediopié' : 'antepié'} observado`,
+      detail: `Ángulo de contacto: ${metrics.footStrikeAngleDeg}°. No se recomienda cambiarlo sólo para alcanzar una etiqueta; interpretalo junto con carga, rendimiento y confort.`,
     });
   }
 
-  // Inclinación del tronco
-  if (metrics.torsoLeanMedianDeg < 2) {
-    recs.push({
-      status: 'attention',
-      title: 'Postura excesivamente erguida',
-      detail: 'Inclinación del tronco < 2°. Favorecer una leve inclinación desde el tobillo (no flexión lumbar) para mejorar la propulsión.',
-    });
-  } else if (metrics.torsoLeanMedianDeg > 15) {
-    recs.push({
-      status: 'caution',
-      title: 'Colapso anterior excesivo',
-      detail: `Inclinación del tronco: ${metrics.torsoLeanMedianDeg}°. Reforzar estabilidad de core y revisar fatiga.`,
-    });
-  } else {
-    recs.push({
-      status: 'optimal',
-      title: 'Inclinación del tronco adecuada',
-      detail: `Inclinación: ${metrics.torsoLeanMedianDeg}° (rango funcional 4°–10°).`,
-    });
-  }
+  // Inclinación del tronco: no hay ventana fija aplicable a todos.
+  recs.push({
+    status: 'optimal',
+    title: 'Inclinación del tronco observada',
+    detail: `Inclinación: ${metrics.torsoLeanMedianDeg}°. Compará la consistencia entre sesiones y la relación con fatiga o confort; no se aplica una ventana universal.`,
+  });
 
   return recs;
 }
@@ -368,13 +353,13 @@ export function buildRunningRecommendations(
 export function makeRunningDemoSummary(): RunningAnalysisSummary {
   return {
     modality: 'running',
-    cadenceSpm: 168,
-    footStrikeAngleDeg: 6.2,
+    cadenceSpm: 171.4,
+    footStrikeAngleDeg: 2.9,
     footStrikeType: 'midfoot',
-    overstridingIndex: 0.08,
-    kneeFlexionAtContactDeg: 18.4,
+    overstridingIndex: -0.1,
+    kneeFlexionAtContactDeg: 11.5,
     kneeFlexionAtMidstanceDeg: 38.7,
-    torsoLeanMedianDeg: 7.1,
+    torsoLeanMedianDeg: 10.1,
     detectionConfidence: 0.91,
     frameCoverage: 0.88,
     confidence: 0.80,

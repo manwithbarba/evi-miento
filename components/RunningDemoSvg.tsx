@@ -50,10 +50,10 @@ export function RunningDemoSvg() {
 
       {/* Arco de ángulo FSA */}
       <path className="angle-arc" d="M347 358 A25 25 0 0 0 372 362" />
-      <text className="angle-text" x="380" y="358">6.2°</text>
+      <text className="angle-text" x="380" y="358">2.9°</text>
 
       {/* Cadencia */}
-      <text className="angle-text" x="480" y="80" style={{ fontSize: 16 }}>168 SPM</text>
+      <text className="angle-text" x="480" y="80" style={{ fontSize: 16 }}>171.4 SPM</text>
     </svg>
   );
 }

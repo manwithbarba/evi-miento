@@ -1,5 +1,7 @@
 export type { LandmarkPoint, PoseFrame, TargetRange, Side, RangeStatus, AnalysisSummary } from './biomechanics';
 export type { RunningAnalysisSummary, RunningRecommendation, FootStrikeType } from './running-biomechanics';
+export type { EvidenceReference, EvidenceStrength, EvidenceUse, MetricEvidence } from './evidence';
+export type { GhostComparison, GhostComparisonStatus, GhostMetricReference, GhostReference } from './ghost-reference';
 
 /** Modalidad deportiva soportada. */
 export type SportModality = 'cycling' | 'running';
@@ -10,27 +12,32 @@ export type CameraView = 'sagittal' | 'frontal';
 /** Niveles de semaforización accesibles (WCAG 2.1 AA). */
 export type TrafficLightLevel = 'green' | 'yellow' | 'red';
 
-/** Evaluación metrológica de la calidad del dato e incertidumbre instrumental. */
+/** Calidad de señal observada. No es una estimación validada de error angular. */
 export interface MetrologicalEvaluation {
   level: TrafficLightLevel;
   confidence: number;
   frameCoverage: number;
-  marginOfErrorDeg: number;
+  qualityBand: 'high' | 'usable' | 'insufficient';
   title: string;
   description: string;
 }
 
-/** Evaluación biomecánica normativa respecto a rangos funcionales. */
+/** Evaluación descriptiva conservada por compatibilidad con el semáforo legado. */
 export interface BiomechanicalEvaluation {
   level: TrafficLightLevel;
   title: string;
   detail: string;
+  evidenceStrength?: import('./evidence').EvidenceStrength;
+  source?: 'descriptive' | 'ghost';
 }
 
 /** Cinemática frontal en carrera (vista posterior o anterior). */
 export interface FrontalRunningSummary {
   modality: 'running';
   view: 'frontal';
+  /** Oblicuidad de la línea bi-ilíaca; no equivale por sí sola a Trendelenburg. */
+  pelvicObliquityDeg: number;
+  /** Alias legado conservado para sesiones guardadas anteriores. */
   contralateralPelvicDropDeg: number;
   dynamicKneeValgusLeftDeg: number;
   dynamicKneeValgusRightDeg: number;
@@ -51,6 +58,8 @@ export interface FrontalCyclingSummary {
   kneeLateralExcursionLeftMm: number;
   kneeLateralExcursionRightMm: number;
   pelvicRockingDeg: number;
+  /** La escala lineal actual se estima usando un ancho pélvico asumido. */
+  linearScale: 'assumed-pelvic-width';
   detectionConfidence: number;
   frameCoverage: number;
   confidence: number;

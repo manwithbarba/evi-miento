@@ -127,6 +127,23 @@
   .validation-step p {
     @apply mt-1 text-xs leading-5 text-slate-500;
   }
+  .ghost-toggle {
+    @apply inline-flex items-center gap-2 rounded-lg border border-white/8 bg-white/[.035] px-3 py-2 text-xs text-slate-400 transition-colors hover:border-lime-300/25 hover:text-lime-200;
+  }
+  .ghost-toggle-active {
+    @apply border-lime-300/35 bg-lime-300/10 text-lime-100;
+  }
+  .ghost-stage {
+    @apply relative overflow-hidden rounded-xl border border-white/8 bg-[#080d12] p-4;
+    background-image: radial-gradient(circle at center, rgba(190,242,100,.055), transparent 62%);
+  }
+  .ghost-stage svg { @apply h-auto min-h-[260px] w-full; }
+  .ghost-bike { fill: none; stroke: #344454; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+  .ghost-body { fill: none; stroke: #cbd5e1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 6; }
+  .ghost-head { fill: #cbd5e1; stroke: #0b1016; stroke-width: 3; }
+  .ghost-joint { fill: #bef264; stroke: #0b1016; stroke-width: 3; }
+  .ghost-ground { stroke: #344454; stroke-dasharray: 7 6; stroke-width: 3; }
+  .ghost-caption { fill: #d9f99d; font-family: var(--font-geist-mono); font-size: 13px; font-weight: 700; }
 }
 
 @media print {

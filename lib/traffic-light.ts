@@ -3,18 +3,15 @@ import type {
   MetrologicalEvaluation,
   TrafficLightLevel,
 } from './types';
+import type { EvidenceStrength } from './evidence';
 
 // ---------------------------------------------------------------------------
-// 1. Evaluación de Calidad Metrológica (Incertidumbre Instrumental)
+// Calidad de señal
 // ---------------------------------------------------------------------------
 
 /**
- * Evalúa la calidad metrológica de la inferencia combinando la confianza
- * de detección media y la cobertura temporal de cuadros válidos.
- *
- * Verde: Confianza >= 0.80 y Cobertura >= 85% (Incertidumbre angular aprox. ±1.5°)
- * Amarillo: Confianza >= 0.65 y Cobertura >= 70% (Incertidumbre aprox. ±4.0°)
- * Rojo: Confianza < 0.65 o Cobertura < 70% (Calidad insuficiente para emitir pautas)
+ * Combina confianza y cobertura para decidir si una lectura puede mostrarse.
+ * Estas bandas describen calidad de señal; no son intervalos de error angular.
  */
 export function evaluateMetrologicalQuality(
   confidence: number,
@@ -25,9 +22,9 @@ export function evaluateMetrologicalQuality(
       level: 'green',
       confidence,
       frameCoverage,
-      marginOfErrorDeg: 1.5,
-      title: 'Calidad metrológica óptima',
-      description: 'Detección anatómica nítida y continua sin oclusiones significativas. Margen de error estimado en ±1.5°.',
+      qualityBand: 'high',
+      title: 'Calidad de señal alta',
+      description: 'Detección continua y con buena visibilidad. La lectura es utilizable para comparar tendencias; esta banda no representa un margen de error angular validado.',
     };
   }
 
@@ -36,9 +33,9 @@ export function evaluateMetrologicalQuality(
       level: 'yellow',
       confidence,
       frameCoverage,
-      marginOfErrorDeg: 4.0,
-      title: 'Calidad metrológica aceptable',
-      description: 'Presencia moderada de ruido visual u oclusiones en el recorrido. Margen de error estimado en ±4.0°. Interpretar tendencias.',
+      qualityBand: 'usable',
+      title: 'Calidad de señal utilizable',
+      description: 'Hay ruido visual u oclusiones moderadas. Interpretá tendencias y repetí la captura antes de tomar decisiones de ajuste.',
     };
   }
 
@@ -46,179 +43,145 @@ export function evaluateMetrologicalQuality(
     level: 'red',
     confidence,
     frameCoverage,
-    marginOfErrorDeg: 8.0,
-    title: 'Calidad metrológica insuficiente',
-    description: 'La baja visibilidad o cobertura temporal (<70%) no permite garantizar mediciones fiables. Repetir la captura.',
+    qualityBand: 'insufficient',
+    title: 'Calidad de señal insuficiente',
+    description: 'La visibilidad o cobertura temporal no alcanza para interpretar la métrica. Repetí la captura con mejor encuadre e iluminación.',
   };
 }
 
 // ---------------------------------------------------------------------------
-// 2. Evaluadores Biomecánicos por Disciplina y Plano
+// Evaluaciones legadas: lectura descriptiva, no corte normativo
 // ---------------------------------------------------------------------------
 
-/** Flexión de rodilla al punto muerto inferior (BDC) en ciclismo. */
-export function evaluateCyclingKneeBdc(angleDeg: number): BiomechanicalEvaluation {
-  if (angleDeg >= 25 && angleDeg <= 35) {
-    return {
-      level: 'green',
-      title: 'Rango funcional óptimo',
-      detail: `${angleDeg.toFixed(1)}° (rango de referencia 25°–35°). Excelente equilibrio entre potencia y salud patelofemoral.`,
-    };
-  }
-  if ((angleDeg >= 20 && angleDeg < 25) || (angleDeg > 35 && angleDeg <= 40)) {
-    return {
-      level: 'yellow',
-      title: 'Zona de ajuste menor',
-      detail: `${angleDeg.toFixed(1)}°. Desviación moderada. Se recomienda ajuste sutil (±3 mm en sillín) si existe incomodidad.`,
-    };
-  }
-  return {
-    level: 'red',
-    title: 'Desviación cinemática marcada',
-    detail: `${angleDeg.toFixed(1)}°. ${angleDeg < 20 ? 'Riesgo de hiperextensión en tendón de Aquiles/isquiotibiales.' : 'Hiperflexión excesiva con sobrecarga patelofemoral.'}`,
-  };
-}
-
-/** Desviación lateral de rodilla en vista frontal (Knee Tracking en ciclismo). */
-export function evaluateCyclingKneeTracking(excursionMm: number): BiomechanicalEvaluation {
-  if (excursionMm <= 15) {
-    return {
-      level: 'green',
-      title: 'Alineación frontal óptima',
-      detail: `${excursionMm.toFixed(1)} mm de excursión. Trayectoria lineal en el plano sagital sin colapso medial.`,
-    };
-  }
-  if (excursionMm <= 25) {
-    return {
-      level: 'yellow',
-      title: 'Desviación mediolateral moderada',
-      detail: `${excursionMm.toFixed(1)} mm. Movimiento en "8" perceptible; revisar cuñas de calas o rotación de pie.`,
-    };
-  }
-  return {
-    level: 'red',
-    title: 'Excursión lateral excesiva',
-    detail: `${excursionMm.toFixed(1)} mm. Desalineación marcada de la rodilla con el eje del pedal; evaluar factor Q y soporte plantar.`,
-  };
-}
-
-/** Balanceo u oscilación pélvica lateral en el sillín (Pelvic Rocking en ciclismo). */
-export function evaluateCyclingPelvicRocking(rockingDeg: number): BiomechanicalEvaluation {
-  if (rockingDeg <= 2.5) {
-    return {
-      level: 'green',
-      title: 'Estabilidad pélvica conservada',
-      detail: `${rockingDeg.toFixed(1)}° de oscilación. La pelvis permanece estable sobre el plano del asiento.`,
-    };
-  }
-  if (rockingDeg <= 4.5) {
-    return {
-      level: 'yellow',
-      title: 'Oscilación pélvica moderada',
-      detail: `${rockingDeg.toFixed(1)}°. Ligero balanceo alterno; evaluar si la altura del sillín está al límite o hay fatiga.`,
-    };
-  }
-  return {
-    level: 'red',
-    title: 'Balanceo pélvico acentuado',
-    detail: `${rockingDeg.toFixed(1)}°. Indica habitualmente sillín excesivamente alto que obliga al ciclista a descender la cadera para alcanzar el pedal.`,
-  };
-}
-
-/** Cadencia en carrera (SPM). */
-export function evaluateRunningCadence(cadenceSpm: number): BiomechanicalEvaluation {
-  if (cadenceSpm >= 165 && cadenceSpm <= 190) {
-    return {
-      level: 'green',
-      title: 'Cadencia funcional',
-      detail: `${cadenceSpm} SPM. Ventana óptima para minimizar picos de fuerza de impacto vertical.`,
-    };
-  }
-  if ((cadenceSpm >= 155 && cadenceSpm < 165) || (cadenceSpm > 190 && cadenceSpm <= 205)) {
-    return {
-      level: 'yellow',
-      title: 'Cadencia fuera de rango ideal',
-      detail: `${cadenceSpm} SPM. Aceptable según antropometría y ritmo; monitorear si se acompaña de sobrezancada.`,
-    };
-  }
-  return {
-    level: 'red',
-    title: 'Cadencia ineficiente o extrema',
-    detail: `${cadenceSpm} SPM. ${cadenceSpm < 155 ? 'Frecuencia baja asociada a mayor oscilación vertical y tiempo de contacto.' : 'Cadencia excesiva con posible aumento del costo metabólico.'}`,
-  };
-}
-
-/** Caída pélvica contralateral en carrera (Trendelenburg dinámico en apoyo monopodal). */
-export function evaluateRunningPelvicDrop(dropDeg: number): BiomechanicalEvaluation {
-  if (dropDeg <= 4.0) {
-    return {
-      level: 'green',
-      title: 'Control lumbopélvico adecuado',
-      detail: `${dropDeg.toFixed(1)}° de caída. Estabilización activa eficiente de los abductores de cadera.`,
-    };
-  }
-  if (dropDeg <= 6.5) {
-    return {
-      level: 'yellow',
-      title: 'Caída contralateral moderada',
-      detail: `${dropDeg.toFixed(1)}°. Descenso de pelvis en apoyo monopodal; se sugiere reforzar glúteo medio y core.`,
-    };
-  }
-  return {
-    level: 'red',
-    title: 'Trendelenburg dinámico marcado',
-    detail: `${dropDeg.toFixed(1)}°. Déficit evidente de estabilización abductora; correlacionado con sobrecarga en cintilla iliotibial y rótula.`,
-  };
-}
-
-/** Valgo dinámico de rodilla en plano frontal (FPPA en carrera). */
-export function evaluateRunningKneeValgus(valgusDeg: number): BiomechanicalEvaluation {
-  if (valgusDeg <= 5.0) {
-    return {
-      level: 'green',
-      title: 'Alineación fémur-tibia neutra',
-      detail: `${valgusDeg.toFixed(1)}° de desviación medial. Desplazamiento articular congruente en plano frontal.`,
-    };
-  }
-  if (valgusDeg <= 10.0) {
-    return {
-      level: 'yellow',
-      title: 'Valgo dinámico moderado',
-      detail: `${valgusDeg.toFixed(1)}°. Desplazamiento medial de rodilla en la fase de amortiguación.`,
-    };
-  }
-  return {
-    level: 'red',
-    title: 'Colapso en valgo significativo',
-    detail: `${valgusDeg.toFixed(1)}°. Incrementa la torsión femororrotuliana; trabajar control neuromuscular y rotadores externos de cadera.`,
-  };
-}
-
-/** Ancho de paso y cruzamiento en carrera. */
-export function evaluateRunningStepWidth(stepWidthRatio: number, crossover: boolean): BiomechanicalEvaluation {
-  if (crossover) {
-    return {
-      level: 'red',
-      title: 'Cruzamiento de zancada (Crossover gait)',
-      detail: 'El pie apoya cruzando la línea media del cuerpo. Incrementa el momento aductor en rodilla y cadera.',
-    };
-  }
-  if (stepWidthRatio >= 0.15) {
-    return {
-      level: 'green',
-      title: 'Base de sustentación funcional',
-      detail: `Ratio intermaleolar: ${stepWidthRatio.toFixed(2)}. Separación lateral adecuada durante la marcha.`,
-    };
-  }
+function descriptiveEvaluation(
+  value: number,
+  label: string,
+  unit: string,
+  evidenceStrength: EvidenceStrength,
+  detail: string,
+): BiomechanicalEvaluation {
+  const formatted = Number.isFinite(value) ? `${value.toFixed(1)}${unit}` : 'sin dato';
   return {
     level: 'yellow',
-    title: 'Base de sustentación estrecha',
-    detail: `Ratio: ${stepWidthRatio.toFixed(2)}. Muy cercano a la línea media; vigilar rozamiento entre miembros y fricción tibial.`,
+    title: 'Lectura descriptiva',
+    detail: `${label}: ${formatted}. ${detail}`,
+    evidenceStrength,
+    source: 'descriptive',
+  };
+}
+
+/** Compatibilidad API: la flexión BDC se informa, no se juzga con un corte fijo. */
+export function evaluateCyclingKneeBdc(angleDeg: number): BiomechanicalEvaluation {
+  return descriptiveEvaluation(
+    angleDeg,
+    'Flexión de rodilla BDC',
+    '°',
+    'moderate',
+    'El ángulo dinámico ayuda a explorar la altura del sillín, pero la revisión disponible no establece un rango universal. Compará con tu línea base y confort.',
+  );
+}
+
+export function evaluateCyclingKneeTracking(excursionMm: number): BiomechanicalEvaluation {
+  return descriptiveEvaluation(
+    excursionMm,
+    'Tracking de rodilla',
+    ' mm',
+    'limited',
+    'La escala lineal es estimada a partir del ancho pélvico asumido; no hay un corte universal validado para indicar lesión o ajuste.',
+  );
+}
+
+export function evaluateCyclingPelvicRocking(rockingDeg: number): BiomechanicalEvaluation {
+  return descriptiveEvaluation(
+    rockingDeg,
+    'Balanceo pélvico',
+    '°',
+    'limited',
+    'Puede orientar una prueba de sillín, fatiga y control, pero no demuestra por sí solo que el sillín esté alto.',
+  );
+}
+
+export function evaluateRunningCadence(cadenceSpm: number): BiomechanicalEvaluation {
+  return descriptiveEvaluation(
+    cadenceSpm,
+    'Cadencia',
+    ' SPM',
+    'moderate',
+    'La cadencia puede modificarse experimentalmente; la evidencia no respalda una cadencia óptima universal.',
+  );
+}
+
+export function evaluateRunningPelvicDrop(dropDeg: number): BiomechanicalEvaluation {
+  return descriptiveEvaluation(
+    dropDeg,
+    'Oblicuidad pélvica',
+    '°',
+    'insufficient',
+    'La lectura 2D no identifica por sí sola una caída contralateral ni un Trendelenburg clínico.',
+  );
+}
+
+export function evaluateRunningKneeValgus(valgusDeg: number): BiomechanicalEvaluation {
+  return descriptiveEvaluation(
+    valgusDeg,
+    'Proyección frontal de rodilla',
+    '°',
+    'insufficient',
+    'Es una proyección 2D dependiente del plano de cámara; no se aplica un punto de corte universal.',
+  );
+}
+
+export function evaluateRunningStepWidth(stepWidthRatio: number, crossover: boolean): BiomechanicalEvaluation {
+  return {
+    level: 'yellow',
+    title: 'Lectura descriptiva',
+    detail: `Ancho de paso relativo: ${Number.isFinite(stepWidthRatio) ? stepWidthRatio.toFixed(2) : 'sin dato'}. ${crossover ? 'Se observó posible cruzamiento en la proyección.' : 'No se observó cruzamiento en la proyección.'} La literatura no respalda un corte universal para prescribir una corrección.`,
+    evidenceStrength: 'insufficient',
+    source: 'descriptive',
+  };
+}
+
+/**
+ * Semáforo exclusivamente técnico para comparar una lectura con un fantasma
+ * de QA. Nunca debe interpretarse como semáforo clínico o normativo.
+ */
+export function evaluateAgainstGhost(
+  observed: number,
+  expected: number,
+  tolerance: number,
+  label: string,
+  unit = '',
+): BiomechanicalEvaluation {
+  if (!Number.isFinite(observed)) {
+    return {
+      level: 'red',
+      title: 'Sin dato comparable',
+      detail: `${label}: no se pudo calcular la lectura para contrastarla con el fantasma de calibración.`,
+      evidenceStrength: 'limited',
+      source: 'ghost',
+    };
+  }
+
+  const delta = observed - expected;
+  const absoluteDelta = Math.abs(delta);
+  const level: TrafficLightLevel = absoluteDelta <= tolerance
+    ? 'green'
+    : absoluteDelta <= tolerance * 2
+      ? 'yellow'
+      : 'red';
+  const direction = delta >= 0 ? 'por encima' : 'por debajo';
+
+  return {
+    level,
+    title: level === 'green' ? 'Compatible con fantasma' : level === 'yellow' ? 'Diferencia para explorar' : 'Revisar calibración',
+    detail: `${label}: ${observed.toFixed(1)}${unit}; fantasma ${expected.toFixed(1)}${unit} ±${tolerance}${unit}. La lectura está ${direction} en ${absoluteDelta.toFixed(1)}${unit}; esto sólo controla el comportamiento del algoritmo.`,
+    evidenceStrength: 'limited',
+    source: 'ghost',
   };
 }
 
 // ---------------------------------------------------------------------------
-// 3. Clases y Helpers de Accesibilidad (WCAG 2.1 AA)
+// Clases y helpers de accesibilidad (WCAG 2.1 AA)
 // ---------------------------------------------------------------------------
 
 export function trafficLightBadgeClasses(level: TrafficLightLevel): string {

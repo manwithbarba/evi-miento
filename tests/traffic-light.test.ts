@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  evaluateAgainstGhost,
   evaluateCyclingKneeBdc,
   evaluateCyclingKneeTracking,
   evaluateCyclingPelvicRocking,
@@ -14,99 +15,59 @@ import {
 } from '../lib/traffic-light';
 
 describe('evaluateMetrologicalQuality', () => {
-  it('classifies high confidence and coverage as green (optimal)', () => {
+  it('classifies high confidence and coverage as high signal', () => {
     const res = evaluateMetrologicalQuality(0.85, 0.92);
     expect(res.level).toBe('green');
-    expect(res.marginOfErrorDeg).toBe(1.5);
-    expect(res.title).toContain('óptima');
+    expect(res.qualityBand).toBe('high');
+    expect(res.title).toContain('alta');
+    expect(res.description).toContain('no representa un margen');
   });
 
-  it('classifies intermediate values as yellow (acceptable)', () => {
+  it('classifies intermediate values as usable', () => {
     const res = evaluateMetrologicalQuality(0.72, 0.78);
     expect(res.level).toBe('yellow');
-    expect(res.marginOfErrorDeg).toBe(4.0);
-    expect(res.title).toContain('aceptable');
+    expect(res.qualityBand).toBe('usable');
   });
 
-  it('classifies confidence < 0.65 as red (insufficient)', () => {
-    const res = evaluateMetrologicalQuality(0.60, 0.95);
-    expect(res.level).toBe('red');
-    expect(res.marginOfErrorDeg).toBe(8.0);
-    expect(res.title).toContain('insuficiente');
-  });
-
-  it('classifies coverage < 0.70 as red (insufficient)', () => {
-    const res = evaluateMetrologicalQuality(0.95, 0.65);
-    expect(res.level).toBe('red');
+  it('classifies low confidence or coverage as insufficient', () => {
+    expect(evaluateMetrologicalQuality(0.60, 0.95).qualityBand).toBe('insufficient');
+    expect(evaluateMetrologicalQuality(0.95, 0.65).qualityBand).toBe('insufficient');
   });
 });
 
-describe('evaluateCyclingKneeBdc', () => {
-  it('classifies within 25°–35° as green', () => {
-    expect(evaluateCyclingKneeBdc(30).level).toBe('green');
-    expect(evaluateCyclingKneeBdc(25).level).toBe('green');
-    expect(evaluateCyclingKneeBdc(35).level).toBe('green');
-  });
-
-  it('classifies 20°–24.9° and 35.1°–40° as yellow', () => {
-    expect(evaluateCyclingKneeBdc(22).level).toBe('yellow');
-    expect(evaluateCyclingKneeBdc(38).level).toBe('yellow');
-  });
-
-  it('classifies < 20° or > 40° as red', () => {
-    expect(evaluateCyclingKneeBdc(18).level).toBe('red');
-    expect(evaluateCyclingKneeBdc(42).level).toBe('red');
-  });
-});
-
-describe('evaluateCyclingKneeTracking & PelvicRocking', () => {
-  it('evaluates knee tracking excursion in mm', () => {
-    expect(evaluateCyclingKneeTracking(10).level).toBe('green');
-    expect(evaluateCyclingKneeTracking(20).level).toBe('yellow');
-    expect(evaluateCyclingKneeTracking(30).level).toBe('red');
-  });
-
-  it('evaluates pelvic rocking in degrees', () => {
-    expect(evaluateCyclingPelvicRocking(1.8).level).toBe('green');
-    expect(evaluateCyclingPelvicRocking(3.5).level).toBe('yellow');
-    expect(evaluateCyclingPelvicRocking(5.2).level).toBe('red');
+describe('biomechanical evaluators', () => {
+  it('keeps biomechanical readings descriptive instead of normative', () => {
+    const evaluations = [
+      evaluateCyclingKneeBdc(18),
+      evaluateCyclingKneeTracking(30),
+      evaluateCyclingPelvicRocking(5.2),
+      evaluateRunningCadence(145),
+      evaluateRunningPelvicDrop(7.8),
+      evaluateRunningKneeValgus(12),
+      evaluateRunningStepWidth(0.1, true),
+    ];
+    expect(evaluations.every((evaluation) => evaluation.source === 'descriptive')).toBe(true);
+    expect(evaluations.every((evaluation) => evaluation.title === 'Lectura descriptiva')).toBe(true);
+    expect(evaluations.map((evaluation) => evaluation.level)).toEqual([
+      'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',
+    ]);
   });
 });
 
-describe('running traffic light evaluators', () => {
-  it('evaluates cadence functionally', () => {
-    expect(evaluateRunningCadence(175).level).toBe('green');
-    expect(evaluateRunningCadence(160).level).toBe('yellow');
-    expect(evaluateRunningCadence(198).level).toBe('yellow');
-    expect(evaluateRunningCadence(145).level).toBe('red');
-    expect(evaluateRunningCadence(210).level).toBe('red');
-  });
-
-  it('evaluates contralateral pelvic drop (Trendelenburg dinámico)', () => {
-    expect(evaluateRunningPelvicDrop(3.2).level).toBe('green');
-    expect(evaluateRunningPelvicDrop(5.4).level).toBe('yellow');
-    expect(evaluateRunningPelvicDrop(7.8).level).toBe('red');
-  });
-
-  it('evaluates dynamic knee valgus (FPPA)', () => {
-    expect(evaluateRunningKneeValgus(3.5).level).toBe('green');
-    expect(evaluateRunningKneeValgus(7.2).level).toBe('yellow');
-    expect(evaluateRunningKneeValgus(12.0).level).toBe('red');
-  });
-
-  it('evaluates step width and crossover gait', () => {
-    expect(evaluateRunningStepWidth(0.20, false).level).toBe('green');
-    expect(evaluateRunningStepWidth(0.10, false).level).toBe('yellow');
-    expect(evaluateRunningStepWidth(0.18, true).level).toBe('red');
+describe('evaluateAgainstGhost', () => {
+  it('separates regression comparison from biomechanical interpretation', () => {
+    expect(evaluateAgainstGhost(31.8, 31.8, 6, 'BDC', '°').level).toBe('green');
+    expect(evaluateAgainstGhost(40, 31.8, 6, 'BDC', '°').level).toBe('yellow');
+    expect(evaluateAgainstGhost(50, 31.8, 6, 'BDC', '°').level).toBe('red');
+    expect(evaluateAgainstGhost(31.8, 31.8, 6, 'BDC', '°').source).toBe('ghost');
   });
 });
 
 describe('trafficLightBadgeClasses & trafficLightLabel', () => {
-  it('returns distinct WCAG-compliant classes and labels for all levels', () => {
+  it('returns distinct accessible classes and labels', () => {
     expect(trafficLightLabel('green')).toBe('Óptimo');
     expect(trafficLightLabel('yellow')).toBe('Atención');
     expect(trafficLightLabel('red')).toBe('Revisión');
-
     expect(trafficLightBadgeClasses('green')).toContain('emerald');
     expect(trafficLightBadgeClasses('yellow')).toContain('amber');
     expect(trafficLightBadgeClasses('red')).toContain('rose');

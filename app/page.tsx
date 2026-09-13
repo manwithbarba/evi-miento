@@ -12,6 +12,8 @@ import { VideoCapture } from '@/components/VideoCapture';
 import { useAnalysis } from '@/hooks/useAnalysis';
 import type { CyclingDiscipline, SportModality } from '@/lib/types';
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+
 /** SVG de demostración para ciclismo (idéntico al original). */
 function CyclingDemoSvg() {
   return (
@@ -20,7 +22,7 @@ function CyclingDemoSvg() {
       <g className="bike-lines"><circle cx="185" cy="337" r="77" /><circle cx="568" cy="337" r="77" /><path d="M185 337 L316 337 L268 209 L451 222 L568 337 L316 337 L451 222" /><path d="M268 209 L245 176 M451 222 L482 167 M461 174 L506 174" /></g>
       <g className="body-lines"><circle cx="350" cy="78" r="28" /><path d="M342 108 L312 184 L405 210 L465 174" /><path d="M312 184 L354 273 L309 337" /><path d="M312 184 L269 257 L318 337" /></g>
       {[[342,108],[312,184],[354,273],[309,337],[405,210],[465,174]].map(([cx,cy]) => <circle key={`${cx}-${cy}`} className="joint" cx={cx} cy={cy} r="7" />)}
-      <path className="angle-arc" d="M329 248 A43 43 0 0 1 365 296" /><text className="angle-text" x="375" y="286">31.8°</text>
+      <path className="angle-arc" d="M329 248 A43 43 0 0 1 365 296" /><text className="angle-text" x="375" y="286">38.6°</text>
     </svg>
   );
 }
@@ -65,7 +67,7 @@ export default function Home() {
                 <Activity className="size-5" strokeWidth={2.3} />
               </div>
               <div>
-                <p className="text-[15px] font-semibold tracking-[-0.02em] text-white">Movimiento</p>
+                <p className="text-[15px] font-semibold tracking-[-0.02em] text-white">Evi Miento</p>
                 <p className="text-xs text-slate-500">Análisis biomecánico deportivo</p>
               </div>
             </div>
@@ -89,11 +91,12 @@ export default function Home() {
               {modality === 'cycling' ? <Bike className="size-5" strokeWidth={2.3} /> : <Footprints className="size-5" strokeWidth={2.3} />}
             </div>
             <div>
-              <p className="text-[15px] font-semibold tracking-[-0.02em] text-white">Movimiento</p>
+              <p className="text-[15px] font-semibold tracking-[-0.02em] text-white">Evi Miento</p>
               <p className="text-xs text-slate-500">{modality === 'cycling' ? 'Bike fitting asistido' : 'Análisis de la marcha'}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <a href={`${BASE_PATH}/ghost/`} className="hidden text-xs text-slate-500 transition hover:text-lime-200 sm:block">Laboratorio ghost</a>
             <button type="button" onClick={() => { analysis.clearVideo(); setModality(null); }} className="hidden text-xs text-slate-500 transition hover:text-slate-300 sm:block">
               ← Cambiar deporte
             </button>
@@ -183,17 +186,18 @@ export default function Home() {
 
         <section className="method-grid mt-5">
           <div className="panel p-5 sm:p-6">
-            <p className="step-label">Qué hace Movimiento</p>
+            <p className="step-label">Qué hace Evi Miento</p>
             <h2 className="mt-2 text-xl font-semibold text-white">Medición trazable, no una prescripción automática</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
               {modality === 'cycling'
-                ? 'MediaPipe detecta 33 puntos corporales; Movimiento calcula geometría 2D sobre el lado visible, estima el cuadro de máxima extensión y conserva la confianza de cada lectura. Sólo la rodilla genera una sugerencia, siempre en pasos de 3 mm y con nueva medición obligatoria.'
-                : 'MediaPipe detecta 33 puntos corporales; Movimiento identifica ciclos de zancada, clasifica el patrón de contacto, mide cadencia y analiza la cinemática articular. Las recomendaciones son pautas deportivas conservadoras, no diagnósticos clínicos.'}
+                ? 'MediaPipe detecta 33 puntos corporales; Evi Miento calcula geometría 2D sobre el lado visible, conserva la confianza de cada lectura y compara el resultado con un fantasma sintético de regresión. Sólo la rodilla genera una sugerencia, siempre en pasos de 3 mm y con nueva medición obligatoria.'
+                : 'MediaPipe detecta 33 puntos corporales; Evi Miento identifica ciclos de zancada, clasifica el patrón de contacto, mide cadencia y analiza la cinemática articular. Las recomendaciones son pautas deportivas conservadoras, no diagnósticos clínicos.'}
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
               <a className="source-chip" href="https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js" target="_blank" rel="noreferrer">MediaPipe · documentación</a>
-              <a className="source-chip" href="https://pubmed.ncbi.nlm.nih.gov/24499342/" target="_blank" rel="noreferrer">Validez de cinemática 2D</a>
-              <a className="source-chip" href="https://pubmed.ncbi.nlm.nih.gov/39304615/" target="_blank" rel="noreferrer">Consenso de medición</a>
+              <a className="source-chip" href="https://pubmed.ncbi.nlm.nih.gov/31145650/" target="_blank" rel="noreferrer">Running · FSP y cadencia</a>
+              <a className="source-chip" href="https://pubmed.ncbi.nlm.nih.gov/34706617/" target="_blank" rel="noreferrer">Bike · altura de sillín</a>
+              <a className="source-chip" href="https://pubmed.ncbi.nlm.nih.gov/39285616/" target="_blank" rel="noreferrer">Bike · posición</a>
             </div>
           </div>
           <div className="panel p-5 sm:p-6">

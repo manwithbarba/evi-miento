@@ -199,25 +199,26 @@ describe('buildRunningRecommendations', () => {
     selectedFrame: { time: 2.0, landmarks: [] },
   };
 
-  it('generates optimal recommendations for ideal biomechanics', () => {
+  it('describes readings without applying universal cutoffs', () => {
     const recs = buildRunningRecommendations(baseSummary);
     expect(recs.length).toBe(3);
     expect(recs.every(r => r.status === 'optimal')).toBe(true);
+    expect(recs[0].detail).toContain('No se aplica un rango óptimo universal');
   });
 
-  it('alerts on low cadence with overstriding', () => {
+  it('only suggests cadence experimentation relative to a personal baseline', () => {
     const summary: RunningAnalysisSummary = {
       ...baseSummary,
       cadenceSpm: 152,
       overstridingIndex: 0.22,
     };
-    const recs = buildRunningRecommendations(summary);
-    const cadRec = recs.find(r => r.title.includes('sobrezancada'));
+    const recs = buildRunningRecommendations(summary, { baselineCadenceSpm: 172 });
+    const cadRec = recs.find(r => r.title.includes('línea base'));
     expect(cadRec).toBeDefined();
-    expect(cadRec?.status).toBe('caution');
+    expect(cadRec?.status).toBe('attention');
   });
 
-  it('flags rearfoot strike with extended knee as caution', () => {
+  it('does not label foot strike as inherently faulty', () => {
     const summary: RunningAnalysisSummary = {
       ...baseSummary,
       footStrikeType: 'rearfoot',
@@ -225,31 +226,32 @@ describe('buildRunningRecommendations', () => {
       kneeFlexionAtContactDeg: 8,
     };
     const recs = buildRunningRecommendations(summary);
-    const strikeRec = recs.find(r => r.title.includes('rodilla extendida'));
+    const strikeRec = recs.find(r => r.title.includes('poca flexión'));
     expect(strikeRec).toBeDefined();
-    expect(strikeRec?.status).toBe('caution');
+    expect(strikeRec?.status).toBe('attention');
   });
 
-  it('flags excessive forward torso lean as caution', () => {
+  it('does not apply a fixed torso range', () => {
     const summary: RunningAnalysisSummary = {
       ...baseSummary,
       torsoLeanMedianDeg: 18,
     };
     const recs = buildRunningRecommendations(summary);
-    const torsoRec = recs.find(r => r.title.includes('Colapso anterior'));
+    const torsoRec = recs.find(r => r.title.includes('Inclinación del tronco'));
     expect(torsoRec).toBeDefined();
-    expect(torsoRec?.status).toBe('caution');
+    expect(torsoRec?.status).toBe('optimal');
+    expect(torsoRec?.detail).toContain('no se aplica una ventana universal');
   });
 
-  it('flags overly upright posture as attention', () => {
+  it('does not label an upright torso as an error', () => {
     const summary: RunningAnalysisSummary = {
       ...baseSummary,
       torsoLeanMedianDeg: 1.2,
     };
     const recs = buildRunningRecommendations(summary);
-    const torsoRec = recs.find(r => r.title.includes('erguida'));
+    const torsoRec = recs.find(r => r.title.includes('Inclinación del tronco'));
     expect(torsoRec).toBeDefined();
-    expect(torsoRec?.status).toBe('attention');
+    expect(torsoRec?.status).toBe('optimal');
   });
 });
 
@@ -257,7 +259,7 @@ describe('makeRunningDemoSummary', () => {
   it('provides a complete valid demo summary', () => {
     const demo = makeRunningDemoSummary();
     expect(demo.modality).toBe('running');
-    expect(demo.cadenceSpm).toBe(168);
+    expect(demo.cadenceSpm).toBe(171.4);
     expect(demo.footStrikeType).toBe('midfoot');
     expect(demo.selectedFrame.landmarks).toHaveLength(33);
   });

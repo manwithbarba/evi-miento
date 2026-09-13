@@ -8,21 +8,21 @@ import {
   Save,
   ShieldCheck,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import type { TargetRange } from '@/lib/types';
 import type { AnalysisResult } from '@/hooks/useAnalysis';
 import {
-  evaluateCyclingKneeBdc,
-  evaluateCyclingKneeTracking,
-  evaluateCyclingPelvicRocking,
-  evaluateRunningCadence,
-  evaluateRunningKneeValgus,
-  evaluateRunningPelvicDrop,
-  evaluateRunningStepWidth,
   trafficLightBadgeClasses,
   trafficLightLabel,
 } from '@/lib/traffic-light';
 import type { MetrologicalEvaluation, TrafficLightLevel } from '@/lib/types';
+import {
+  compareCyclingToGhost,
+  compareRunningToGhost,
+  ghostComparisonLabel,
+  type GhostComparison,
+} from '@/lib/ghost-reference';
 
 function TrafficIcon({ level }: { level: TrafficLightLevel }) {
   switch (level) {
@@ -44,9 +44,7 @@ function MetrologicalQualityBanner({ evalData }: { evalData: MetrologicalEvaluat
           <TrafficIcon level={evalData.level} />
           <span>{evalData.title}</span>
         </div>
-        <span className="font-mono text-[11px] font-semibold">
-          ±{evalData.marginOfErrorDeg}° incertidumbre
-        </span>
+        <span className="font-mono text-[11px] font-semibold">{evalData.qualityBand}</span>
       </div>
       <p className="mt-1.5 text-[11px] leading-relaxed opacity-90">
         {evalData.description}
@@ -57,6 +55,25 @@ function MetrologicalQualityBanner({ evalData }: { evalData: MetrologicalEvaluat
       </div>
     </div>
   );
+}
+
+function GhostBadge({ comparison }: { comparison: GhostComparison | undefined }) {
+  if (!comparison) return null;
+  const level: TrafficLightLevel = comparison.status === 'aligned'
+    ? 'green'
+    : comparison.status === 'outside-tolerance'
+      ? 'yellow'
+      : 'red';
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${trafficLightBadgeClasses(level)}`}>
+      <TrafficIcon level={level} />
+      Fantasma · {ghostComparisonLabel(comparison.status)}
+    </span>
+  );
+}
+
+function DescriptiveNote({ children }: { children: ReactNode }) {
+  return <p className="text-[10px] leading-relaxed text-slate-500">Lectura descriptiva · {children}</p>;
 }
 
 function TrafficBadge({ level }: { level: TrafficLightLevel }) {
@@ -109,7 +126,7 @@ export function EmptyResult() {
       </div>
       <h3 className="mt-4 text-base font-semibold text-white">Esperando video</h3>
       <p className="mt-1 max-w-[240px] text-xs leading-5 text-slate-500">
-        Cargá una grabación o iniciá la demostración para obtener la semaforización metrológica y biomecánica.
+        Cargá una grabación o iniciá la demostración para obtener calidad de señal, lecturas descriptivas y comparación con el fantasma de calibración.
       </p>
     </aside>
   );
@@ -135,7 +152,8 @@ export function BiomechanicsResult({
   if (result.modality === 'cycling') {
     const { summary, frontal, recommendation } = result;
     const profile = cyclingProfile ?? { hip: { min: 70, max: 100 }, torso: { min: 35, max: 55 } };
-    const kneeEval = evaluateCyclingKneeBdc(summary.kneeFlexionBdc);
+    const ghostComparisons = compareCyclingToGhost(summary, frontal);
+    const ghostFor = (key: string) => ghostComparisons.find((comparison) => comparison.key === key);
 
     return (
       <aside className="panel p-5">
@@ -151,6 +169,9 @@ export function BiomechanicsResult({
 
         {/* Semáforo Metrológico */}
         <MetrologicalQualityBanner evalData={metrological} />
+        <p className="mb-3 text-[10px] leading-relaxed text-slate-500">
+          El fantasma bike es un control sintético de regresión. Sirve para detectar cambios del algoritmo, no para decidir si una postura es correcta.
+        </p>
 
         {/* Plano Sagital */}
         <div className="space-y-2.5">
@@ -164,27 +185,29 @@ export function BiomechanicsResult({
                 <p className="text-sm text-slate-200">Flexión rodilla · BDC</p>
                 <p className="mt-0.5 text-xs text-slate-500">Define ajuste de altura de sillín</p>
               </div>
-              <TrafficBadge level={kneeEval.level} />
+              <GhostBadge comparison={ghostFor('kneeFlexionBdc')} />
             </div>
             <div className="mt-2.5 flex items-baseline justify-between">
               <span className="font-mono text-2xl font-semibold text-white">
                 {summary.kneeFlexionBdc.toFixed(1)}°
               </span>
-              <span className="text-xs text-slate-400">ref 25°–35°</span>
+              <span className="text-xs text-slate-400">fantasma 38.6° ±2°</span>
             </div>
-            <p className="mt-1 text-[11px] text-slate-400">{kneeEval.detail}</p>
+            <DescriptiveNote>La revisión sobre altura de sillín apoya medir dinámicamente, pero no un rango universal. El objetivo de la sesión es comparar y explorar.</DescriptiveNote>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="metric-card">
               <p className="text-xs text-slate-400">Ángulo cadera mín.</p>
               <p className="mt-1 font-mono text-lg font-semibold text-white">{summary.hipAngleMin.toFixed(1)}°</p>
-              <p className="text-[10px] text-slate-500">ref {profile.hip.min}°–{profile.hip.max}°</p>
+              <GhostBadge comparison={ghostFor('hipAngleMin')} />
+              <p className="text-[10px] text-slate-500">perfil operativo {profile.hip.min}°–{profile.hip.max}°</p>
             </div>
             <div className="metric-card">
               <p className="text-xs text-slate-400">Inclinación torso</p>
               <p className="mt-1 font-mono text-lg font-semibold text-white">{summary.torsoAngleMedian.toFixed(1)}°</p>
-              <p className="text-[10px] text-slate-500">ref {profile.torso.min}°–{profile.torso.max}°</p>
+              <GhostBadge comparison={ghostFor('torsoAngleMedian')} />
+              <p className="text-[10px] text-slate-500">perfil operativo {profile.torso.min}°–{profile.torso.max}°</p>
             </div>
           </div>
         </div>
@@ -202,34 +225,34 @@ export function BiomechanicsResult({
                   <p className="text-sm text-slate-200">Balanceo pélvico (coronal)</p>
                   <p className="mt-0.5 text-xs text-slate-500">Oscilación en el sillín</p>
                 </div>
-                <TrafficBadge level={evaluateCyclingPelvicRocking(frontal.pelvicRockingDeg).level} />
+                <GhostBadge comparison={ghostFor('pelvicRockingDeg')} />
               </div>
               <p className="mt-2 font-mono text-xl font-semibold text-white">
                 {frontal.pelvicRockingDeg.toFixed(1)}°
               </p>
-              <p className="mt-1 text-[11px] text-slate-400">
-                {evaluateCyclingPelvicRocking(frontal.pelvicRockingDeg).detail}
-              </p>
+              <DescriptiveNote>Puede orientar una prueba de sillín, fatiga y control; no demuestra por sí solo una altura incorrecta.</DescriptiveNote>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div className="metric-card">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-400">Tracking Izq</span>
-                  <TrafficBadge level={evaluateCyclingKneeTracking(frontal.kneeLateralExcursionLeftMm).level} />
+                  <GhostBadge comparison={ghostFor('kneeLateralExcursionLeftMm')} />
                 </div>
                 <p className="mt-1 font-mono text-base font-semibold text-white">
                   {frontal.kneeLateralExcursionLeftMm.toFixed(1)} mm
                 </p>
+                <DescriptiveNote>escala estimada por ancho pélvico</DescriptiveNote>
               </div>
               <div className="metric-card">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-400">Tracking Der</span>
-                  <TrafficBadge level={evaluateCyclingKneeTracking(frontal.kneeLateralExcursionRightMm).level} />
+                  <GhostBadge comparison={ghostFor('kneeLateralExcursionRightMm')} />
                 </div>
                 <p className="mt-1 font-mono text-base font-semibold text-white">
                   {frontal.kneeLateralExcursionRightMm.toFixed(1)} mm
                 </p>
+                <DescriptiveNote>escala estimada por ancho pélvico</DescriptiveNote>
               </div>
             </div>
           </div>
@@ -249,7 +272,8 @@ export function BiomechanicsResult({
 
   // Running
   const { summary, frontal, recommendations } = result;
-  const cadenceEval = evaluateRunningCadence(summary.cadenceSpm);
+  const ghostComparisons = compareRunningToGhost(summary, frontal);
+  const ghostFor = (key: string) => ghostComparisons.find((comparison) => comparison.key === key);
 
   return (
     <aside className="panel p-5">
@@ -265,6 +289,9 @@ export function BiomechanicsResult({
 
       {/* Semáforo Metrológico */}
       <MetrologicalQualityBanner evalData={metrological} />
+      <p className="mb-3 text-[10px] leading-relaxed text-slate-500">
+        El fantasma running es un control sintético de regresión. Sirve para detectar cambios del algoritmo, no para definir una técnica ideal.
+      </p>
 
       {/* Plano Sagital */}
       <div className="space-y-2.5">
@@ -278,15 +305,15 @@ export function BiomechanicsResult({
               <p className="text-sm text-slate-200">Cadencia de paso</p>
               <p className="mt-0.5 text-xs text-slate-500">Frecuencia por minuto</p>
             </div>
-            <TrafficBadge level={cadenceEval.level} />
+            <GhostBadge comparison={ghostFor('cadenceSpm')} />
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="font-mono text-2xl font-semibold text-white">
               {summary.cadenceSpm} <span className="text-sm font-normal text-slate-400">SPM</span>
             </span>
-            <span className="text-xs text-slate-400">ref 165–190 SPM</span>
+            <span className="text-xs text-slate-400">fantasma 171.4 ±2 SPM</span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-400">{cadenceEval.detail}</p>
+          <DescriptiveNote>La evidencia apoya probar cambios graduales en casos seleccionados, no una cadencia óptima universal.</DescriptiveNote>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -294,21 +321,25 @@ export function BiomechanicsResult({
             <p className="text-xs text-slate-400">Ángulo de contacto</p>
             <p className="mt-1 font-mono text-lg font-semibold text-white">{summary.footStrikeAngleDeg.toFixed(1)}°</p>
             <p className="text-[10px] capitalize text-lime-300">{summary.footStrikeType}</p>
+            <GhostBadge comparison={ghostFor('footStrikeAngleDeg')} />
           </div>
           <div className="metric-card">
             <p className="text-xs text-slate-400">Sobrezancada</p>
             <p className="mt-1 font-mono text-lg font-semibold text-white">{summary.overstridingIndex.toFixed(2)}</p>
-            <p className="text-[10px] text-slate-500">{summary.overstridingIndex > 0.15 ? 'Alerta' : 'Funcional'}</p>
+            <GhostBadge comparison={ghostFor('overstridingIndex')} />
+            <DescriptiveNote>índice normalizado; sin corte universal</DescriptiveNote>
           </div>
           <div className="metric-card">
             <p className="text-xs text-slate-400">Rodilla · Contacto</p>
             <p className="mt-1 font-mono text-lg font-semibold text-white">{summary.kneeFlexionAtContactDeg.toFixed(1)}°</p>
             <p className="text-[10px] text-slate-500">flexión en IC</p>
+            <GhostBadge comparison={ghostFor('kneeFlexionAtContactDeg')} />
           </div>
           <div className="metric-card">
             <p className="text-xs text-slate-400">Inclinación tronco</p>
             <p className="mt-1 font-mono text-lg font-semibold text-white">{summary.torsoLeanMedianDeg.toFixed(1)}°</p>
-            <p className="text-[10px] text-slate-500">vs vertical (ref 4°–10°)</p>
+            <GhostBadge comparison={ghostFor('torsoLeanMedianDeg')} />
+            <DescriptiveNote>vs vertical; sin ventana universal</DescriptiveNote>
           </div>
         </div>
       </div>
@@ -323,47 +354,47 @@ export function BiomechanicsResult({
           <div className="metric-card">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-sm text-slate-200">Caída pélvica contralateral</p>
-                <p className="mt-0.5 text-xs text-slate-500">Trendelenburg dinámico en apoyo</p>
+                <p className="text-sm text-slate-200">Oblicuidad pélvica observada</p>
+                <p className="mt-0.5 text-xs text-slate-500">proyección coronal 2D</p>
               </div>
-              <TrafficBadge level={evaluateRunningPelvicDrop(frontal.contralateralPelvicDropDeg).level} />
+              <GhostBadge comparison={ghostFor('pelvicObliquityDeg')} />
             </div>
             <p className="mt-2 font-mono text-xl font-semibold text-white">
-              {frontal.contralateralPelvicDropDeg.toFixed(1)}°
+              {frontal.pelvicObliquityDeg.toFixed(1)}°
             </p>
-            <p className="mt-1 text-[11px] text-slate-400">
-              {evaluateRunningPelvicDrop(frontal.contralateralPelvicDropDeg).detail}
-            </p>
+            <DescriptiveNote>Esta lectura no identifica por sí sola una caída contralateral ni un Trendelenburg clínico.</DescriptiveNote>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400">Valgo Izq</span>
-                <TrafficBadge level={evaluateRunningKneeValgus(frontal.dynamicKneeValgusLeftDeg).level} />
+                  <GhostBadge comparison={ghostFor('dynamicKneeValgusLeftDeg')} />
               </div>
-              <p className="mt-1 font-mono text-base font-semibold text-white">
-                {frontal.dynamicKneeValgusLeftDeg.toFixed(1)}°
-              </p>
+                <p className="mt-1 font-mono text-base font-semibold text-white">
+                  {frontal.dynamicKneeValgusLeftDeg.toFixed(1)}°
+                </p>
+                <DescriptiveNote>proyección 2D</DescriptiveNote>
             </div>
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400">Valgo Der</span>
-                <TrafficBadge level={evaluateRunningKneeValgus(frontal.dynamicKneeValgusRightDeg).level} />
+                  <GhostBadge comparison={ghostFor('dynamicKneeValgusRightDeg')} />
               </div>
-              <p className="mt-1 font-mono text-base font-semibold text-white">
-                {frontal.dynamicKneeValgusRightDeg.toFixed(1)}°
-              </p>
+                <p className="mt-1 font-mono text-base font-semibold text-white">
+                  {frontal.dynamicKneeValgusRightDeg.toFixed(1)}°
+                </p>
+                <DescriptiveNote>proyección 2D</DescriptiveNote>
             </div>
           </div>
 
           <div className="metric-card">
             <div className="flex items-start justify-between gap-2">
               <span className="text-xs text-slate-400">Ancho de paso y cruzamiento</span>
-              <TrafficBadge level={evaluateRunningStepWidth(frontal.stepWidthRatio, frontal.crossoverDetected).level} />
+              <GhostBadge comparison={ghostFor('stepWidthRatio')} />
             </div>
             <p className="mt-1 text-xs text-slate-300">
-              {evaluateRunningStepWidth(frontal.stepWidthRatio, frontal.crossoverDetected).detail}
+              Ratio relativo: {frontal.stepWidthRatio.toFixed(2)}. {frontal.crossoverDetected ? 'Se observó posible cruzamiento en la proyección.' : 'No se observó cruzamiento en la proyección.'} Sin corte universal para prescribir una corrección.
             </p>
           </div>
         </div>

@@ -165,15 +165,15 @@ describe('frontal demo summaries', () => {
     const demo = makeFrontalCyclingDemoSummary();
     expect(demo.modality).toBe('cycling');
     expect(demo.view).toBe('frontal');
-    expect(demo.pelvicRockingDeg).toBe(1.9);
-    expect(demo.kneeLateralExcursionLeftMm).toBe(11.2);
+    expect(demo.pelvicRockingDeg).toBe(5.7);
+    expect(demo.kneeLateralExcursionLeftMm).toBe(10.7);
   });
 
   it('generates valid running frontal demo summary', () => {
     const demo = makeFrontalRunningDemoSummary();
     expect(demo.modality).toBe('running');
     expect(demo.view).toBe('frontal');
-    expect(demo.contralateralPelvicDropDeg).toBe(3.6);
-    expect(demo.dynamicKneeValgusLeftDeg).toBe(4.1);
+    expect(demo.contralateralPelvicDropDeg).toBe(7.3);
+    expect(demo.dynamicKneeValgusLeftDeg).toBe(3.4);
   });
 });

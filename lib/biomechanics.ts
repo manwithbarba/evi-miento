@@ -141,29 +141,29 @@ export function buildKneeRecommendation(value: number, target: TargetRange): {
     return {
       status,
       title: 'Probar una suba mínima del sillín',
-      detail: 'La rodilla llega más flexionada que el objetivo. Subí 3 mm, repetí el mismo protocolo y conservá el cambio sólo si mejora la lectura y el confort.',
+      detail: 'La rodilla llega más flexionada que el objetivo operativo. Subí 3 mm como experimento único, repetí el mismo protocolo y conservá el cambio sólo si mejora la lectura, el confort y la estabilidad.',
     };
   }
   if (status === 'below') {
     return {
       status,
       title: 'Probar una baja mínima del sillín',
-      detail: 'La rodilla llega más extendida que el objetivo. Bajá 3 mm y repetí la medición antes de realizar otro cambio.',
+      detail: 'La rodilla llega más extendida que el objetivo operativo. Bajá 3 mm como experimento único y repetí la medición antes de realizar otro cambio.',
     };
   }
   return {
     status,
     title: 'Conservar la altura como línea de base',
-    detail: 'La flexión de rodilla está dentro del objetivo configurado. No cambies la altura sólo por esta lectura; revisá confort, estabilidad pélvica y síntomas.',
+    detail: 'La flexión de rodilla está dentro del objetivo operativo configurado. No cambies la altura sólo por esta lectura; revisá confort, estabilidad pélvica y síntomas.',
   };
 }
 
 export function makeDemoSummary(): AnalysisSummary {
   const landmarks = Array.from({ length: 33 }, () => ({ x: 0.5, y: 0.5, visibility: 0.96 }));
   return {
-    kneeFlexionBdc: 31.8,
-    hipAngleMin: 78.4,
-    torsoAngleMedian: 41.2,
+    kneeFlexionBdc: 38.6,
+    hipAngleMin: 86.2,
+    torsoAngleMedian: 47.5,
     detectionConfidence: 0.96,
     frameCoverage: 0.94,
     confidence: 0.9,

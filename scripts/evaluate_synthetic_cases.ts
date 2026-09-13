@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   buildKneeRecommendation,
+  makeDemoSummary,
   summarizePoseFrames,
   type LandmarkPoint,
   type PoseFrame,
@@ -15,18 +16,11 @@ import {
 import { BILATERAL_LANDMARKS, SIDE_LANDMARKS } from '../lib/landmarks';
 import {
   buildRunningRecommendations,
+  makeRunningDemoSummary,
   summarizeRunningFrames,
 } from '../lib/running-biomechanics';
-import {
-  evaluateCyclingKneeBdc,
-  evaluateCyclingKneeTracking,
-  evaluateCyclingPelvicRocking,
-  evaluateMetrologicalQuality,
-  evaluateRunningCadence,
-  evaluateRunningKneeValgus,
-  evaluateRunningPelvicDrop,
-  evaluateRunningStepWidth,
-} from '../lib/traffic-light';
+import { evaluateMetrologicalQuality } from '../lib/traffic-light';
+import { compareCyclingToGhost, compareRunningToGhost, GHOST_REFERENCES } from '../lib/ghost-reference';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -197,7 +191,7 @@ export function generateRunnerSagittalFrames(): PoseFrame[] {
 
 /**
  * Caso Sintético 4: Corredor en Vista Frontal (Bilateral)
- * Modelo cinemático: apoyo monopodal alterno, caída pélvica ~3.6° y valgo dinámico moderado ~4.3°.
+ * Modelo cinemático: apoyo monopodal alterno y proyección frontal reproducible.
  */
 export function generateRunnerFrontalFrames(): PoseFrame[] {
   const frames: PoseFrame[] = [];
@@ -255,10 +249,41 @@ const bikerFrontal = generateBikerFrontalFrames();
 const runnerSagittal = generateRunnerSagittalFrames();
 const runnerFrontal = generateRunnerFrontalFrames();
 
+function writeFixture(
+  filename: string,
+  description: string,
+  modality: 'cycling' | 'running',
+  view: 'sagittal' | 'frontal',
+  fps: number,
+  frames: PoseFrame[],
+): void {
+  fs.writeFileSync(
+    path.join(samplesDir, filename),
+    JSON.stringify({
+      description,
+      fixtureRole: 'calibration-ghost',
+      ghostId: GHOST_REFERENCES[modality].id,
+      ghostVersion: GHOST_REFERENCES[modality].version,
+      immutable: true,
+      modality,
+      view,
+      fps,
+      frames,
+    }, null, 2),
+  );
+}
+
 fs.writeFileSync(
   path.join(samplesDir, 'synthetic_biker_sagittal.json'),
   JSON.stringify({ description: 'Ciclista sintético · Plano sagital lateral derecho', fps: 15, frames: bikerSagittal }, null, 2),
 );
+
+// Las copias con nombre ghost_* son fixtures inmutables para regresión. Los
+// nombres synthetic_* se conservan para compatibilidad con la versión anterior.
+writeFixture('ghost_biker_sagittal.json', 'Fantasma bike · plano sagital para calibración', 'cycling', 'sagittal', 15, bikerSagittal);
+writeFixture('ghost_biker_frontal.json', 'Fantasma bike · plano frontal para calibración', 'cycling', 'frontal', 15, bikerFrontal);
+writeFixture('ghost_runner_sagittal.json', 'Fantasma running · plano sagital para calibración', 'running', 'sagittal', 30, runnerSagittal);
+writeFixture('ghost_runner_frontal.json', 'Fantasma running · plano frontal para calibración', 'running', 'frontal', 30, runnerFrontal);
 fs.writeFileSync(
   path.join(samplesDir, 'synthetic_biker_frontal.json'),
   JSON.stringify({ description: 'Ciclista sintético · Plano frontal coronal', fps: 15, frames: bikerFrontal }, null, 2),
@@ -288,26 +313,24 @@ const bikeFroSummary = summarizeFrontalCyclingFrames(bikerFrontal);
 
 if (bikeSagSummary) {
   const metroSag = evaluateMetrologicalQuality(bikeSagSummary.confidence, bikeSagSummary.frameCoverage);
-  const kneeEval = evaluateCyclingKneeBdc(bikeSagSummary.kneeFlexionBdc);
   const rec = buildKneeRecommendation(bikeSagSummary.kneeFlexionBdc, { min: 25, max: 35 });
+  const ghostComparisons = compareCyclingToGhost(bikeSagSummary, bikeFroSummary ?? undefined);
 
   console.log(`[Plano Sagital]`);
-  console.log(`  • Semáforo Metrológico:      [${metroSag.level.toUpperCase()}] ${metroSag.title} (Incertidumbre: ±${metroSag.marginOfErrorDeg}°)`);
-  console.log(`  • Flexión de Rodilla en BDC: ${bikeSagSummary.kneeFlexionBdc}° -> [${kneeEval.level.toUpperCase()}] ${kneeEval.title}`);
+  console.log(`  • Calidad de señal:           [${metroSag.level.toUpperCase()}] ${metroSag.title}`);
+  console.log(`  • Flexión de Rodilla en BDC: ${bikeSagSummary.kneeFlexionBdc}° -> fantasma ${ghostComparisons.find(c => c.key === 'kneeFlexionBdc')?.status}`);
   console.log(`  • Ángulo Mínimo de Cadera:   ${bikeSagSummary.hipAngleMin}°`);
   console.log(`  • Inclinación del Torso:     ${bikeSagSummary.torsoAngleMedian}°`);
   console.log(`  • Recomendación de Ajuste:   "${rec.title}" — ${rec.detail}`);
 }
 
 if (bikeFroSummary) {
-  const trackLEval = evaluateCyclingKneeTracking(bikeFroSummary.kneeLateralExcursionLeftMm);
-  const trackREval = evaluateCyclingKneeTracking(bikeFroSummary.kneeLateralExcursionRightMm);
-  const rockEval = evaluateCyclingPelvicRocking(bikeFroSummary.pelvicRockingDeg);
+  const ghostComparisons = compareCyclingToGhost(bikeSagSummary ?? makeDemoSummary(), bikeFroSummary);
 
   console.log(`\n[Plano Frontal]`);
-  console.log(`  • Knee Tracking Izquierdo:   ${bikeFroSummary.kneeLateralExcursionLeftMm} mm -> [${trackLEval.level.toUpperCase()}] ${trackLEval.title}`);
-  console.log(`  • Knee Tracking Derecho:     ${bikeFroSummary.kneeLateralExcursionRightMm} mm -> [${trackREval.level.toUpperCase()}] ${trackREval.title}`);
-  console.log(`  • Balanceo Pélvico (Sillín): ${bikeFroSummary.pelvicRockingDeg}° -> [${rockEval.level.toUpperCase()}] ${rockEval.title}`);
+  console.log(`  • Knee Tracking Izquierdo:   ${bikeFroSummary.kneeLateralExcursionLeftMm} mm -> fantasma ${ghostComparisons.find(c => c.key === 'kneeLateralExcursionLeftMm')?.status}`);
+  console.log(`  • Knee Tracking Derecho:     ${bikeFroSummary.kneeLateralExcursionRightMm} mm -> fantasma ${ghostComparisons.find(c => c.key === 'kneeLateralExcursionRightMm')?.status}`);
+  console.log(`  • Balanceo Pélvico (Sillín): ${bikeFroSummary.pelvicRockingDeg}° -> fantasma ${ghostComparisons.find(c => c.key === 'pelvicRockingDeg')?.status}`);
 }
 
 // B. CARRERA
@@ -318,12 +341,12 @@ const runFroSummary = summarizeFrontalRunningFrames(runnerFrontal);
 
 if (runSagSummary) {
   const metroRun = evaluateMetrologicalQuality(runSagSummary.confidence, runSagSummary.frameCoverage);
-  const cadEval = evaluateRunningCadence(runSagSummary.cadenceSpm);
   const recs = buildRunningRecommendations(runSagSummary);
+  const ghostComparisons = compareRunningToGhost(runSagSummary, runFroSummary ?? undefined);
 
   console.log(`[Plano Sagital]`);
-  console.log(`  • Semáforo Metrológico:      [${metroRun.level.toUpperCase()}] ${metroRun.title} (Incertidumbre: ±${metroRun.marginOfErrorDeg}°)`);
-  console.log(`  • Cadencia de Paso:          ${runSagSummary.cadenceSpm} SPM -> [${cadEval.level.toUpperCase()}] ${cadEval.title}`);
+  console.log(`  • Calidad de señal:           [${metroRun.level.toUpperCase()}] ${metroRun.title}`);
+  console.log(`  • Cadencia de Paso:          ${runSagSummary.cadenceSpm} SPM -> fantasma ${ghostComparisons.find(c => c.key === 'cadenceSpm')?.status}`);
   console.log(`  • Ángulo de Contacto (FSA):  ${runSagSummary.footStrikeAngleDeg}° (${runSagSummary.footStrikeType})`);
   console.log(`  • Índice de Sobrezancada:    ${runSagSummary.overstridingIndex}`);
   console.log(`  • Flexión de Rodilla en IC:  ${runSagSummary.kneeFlexionAtContactDeg}°`);
@@ -333,16 +356,13 @@ if (runSagSummary) {
 }
 
 if (runFroSummary) {
-  const dropEval = evaluateRunningPelvicDrop(runFroSummary.contralateralPelvicDropDeg);
-  const valgusLEval = evaluateRunningKneeValgus(runFroSummary.dynamicKneeValgusLeftDeg);
-  const valgusREval = evaluateRunningKneeValgus(runFroSummary.dynamicKneeValgusRightDeg);
-  const widthEval = evaluateRunningStepWidth(runFroSummary.stepWidthRatio, runFroSummary.crossoverDetected);
+  const ghostComparisons = compareRunningToGhost(runSagSummary ?? makeRunningDemoSummary(), runFroSummary);
 
   console.log(`\n[Plano Frontal]`);
-  console.log(`  • Caída Pélvica (Trendelenburg): ${runFroSummary.contralateralPelvicDropDeg}° -> [${dropEval.level.toUpperCase()}] ${dropEval.title}`);
-  console.log(`  • Valgo Dinámico Rodilla Izq:   ${runFroSummary.dynamicKneeValgusLeftDeg}° -> [${valgusLEval.level.toUpperCase()}] ${valgusLEval.title}`);
-  console.log(`  • Valgo Dinámico Rodilla Der:   ${runFroSummary.dynamicKneeValgusRightDeg}° -> [${valgusREval.level.toUpperCase()}] ${valgusREval.title}`);
-  console.log(`  • Base de Sustentación (Ratio): ${runFroSummary.stepWidthRatio} (Cruzamiento: ${runFroSummary.crossoverDetected ? 'Sí' : 'No'}) -> [${widthEval.level.toUpperCase()}] ${widthEval.title}`);
+  console.log(`  • Oblicuidad pélvica:           ${runFroSummary.pelvicObliquityDeg}° -> fantasma ${ghostComparisons.find(c => c.key === 'pelvicObliquityDeg')?.status}`);
+  console.log(`  • Proyección frontal Izq:       ${runFroSummary.dynamicKneeValgusLeftDeg}° -> fantasma ${ghostComparisons.find(c => c.key === 'dynamicKneeValgusLeftDeg')?.status}`);
+  console.log(`  • Proyección frontal Der:       ${runFroSummary.dynamicKneeValgusRightDeg}° -> fantasma ${ghostComparisons.find(c => c.key === 'dynamicKneeValgusRightDeg')?.status}`);
+  console.log(`  • Base de sustentación:         ${runFroSummary.stepWidthRatio} (Cruzamiento: ${runFroSummary.crossoverDetected ? 'Sí' : 'No'}) -> fantasma ${ghostComparisons.find(c => c.key === 'stepWidthRatio')?.status}`);
 }
 
 console.log('\n================================================================================');
@@ -351,4 +371,7 @@ console.log('  - synthetic_biker_sagittal.json');
 console.log('  - synthetic_biker_frontal.json');
 console.log('  - synthetic_runner_sagittal.json');
 console.log('  - synthetic_runner_frontal.json');
+console.log('Ghosts de calibración inmutables:');
+console.log('  - ghost_biker_sagittal.json / ghost_biker_frontal.json');
+console.log('  - ghost_runner_sagittal.json / ghost_runner_frontal.json');
 console.log('================================================================================\n');

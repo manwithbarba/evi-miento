@@ -131,7 +131,8 @@ export function useAnalysis(modality: SportModality) {
         modality: 'cycling',
         summary,
         frontal,
-        recommendation: buildKneeRecommendation(summary.kneeFlexionBdc, target),
+        // El demo es un fantasma de QA: no debe emitir una prescripción.
+        recommendation: null,
         metrological,
       });
     } else {

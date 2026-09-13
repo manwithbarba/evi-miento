@@ -1,0 +1,55 @@
+{
+  "id": "population-ghost-open-data-candidate",
+  "version": "2026-09-13.1",
+  "status": "candidate",
+  "activeInRecommendations": false,
+  "title": "Fantasma poblacional · candidato de datos abiertos",
+  "description": "Manifiesto de fuentes abiertas potencialmente útiles para construir referencias por cohorte. No contiene cortes normativos ni se usa para recomendaciones.",
+  "sources": [
+    {
+      "id": "bath-50-runners-2023",
+      "title": "Full body kinematics and ground reaction forces of 50 heterogeneous runners",
+      "modality": "running",
+      "participants": 50,
+      "license": "CC BY 4.0",
+      "url": "https://researchdata.bath.ac.uk/1341/",
+      "data": "C3D con marcadores, fuerzas de reacción e IMU; 25 mujeres y 25 varones; varias velocidades y gradientes.",
+      "suitability": "Alta para un candidato poblacional de running",
+      "limitation": "requiere extraer métricas comparables y estratificar velocidad, pendiente y protocolo de laboratorio."
+    },
+    {
+      "id": "rbds-28-runners-2017",
+      "title": "A public dataset of running biomechanics",
+      "modality": "running",
+      "participants": 28,
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.6084/m9.figshare.4543435",
+      "data": "Señales crudas y procesadas de cinemática/cinética en cinta a 2.5, 3.5 y 4.5 m/s, más metadatos y patrón de apoyo.",
+      "suitability": "Alta para replicación y contraste de running",
+      "limitation": "muestra pequeña y predominantemente recreativa; no debe generalizarse a cualquier corredor."
+    },
+    {
+      "id": "mendeley-34-cyclists-2025",
+      "title": "Changes in saddle setback and intensity affect comfort and lower limb kinematics",
+      "modality": "cycling",
+      "participants": 34,
+      "license": "CC BY 4.0",
+      "url": "https://data.mendeley.com/datasets/tvnwnzy8vm/1",
+      "data": "Datos de 34 ciclistas recreativos, tres posiciones de setback y dos intensidades; incluye cinemática de miembros inferiores y confort.",
+      "suitability": "Alta para una cohorte exploratoria de bike",
+      "limitation": "el protocolo es de cicloergómetro y la salida publicada no coincide automáticamente con la captura 2D de la aplicación."
+    },
+    {
+      "id": "zenodo-cyclists-mocap-2024",
+      "title": "Dataset of Motion Capture of Cyclists",
+      "modality": "cycling",
+      "participants": null,
+      "license": "dataset abierto · verificar términos",
+      "url": "https://doi.org/10.5281/zenodo.10668611",
+      "data": "C3D, BVH y GPX de ciclistas en bicicletas de ruta y contrarreloj, con posiciones cómoda, agresiva y aero.",
+      "suitability": "Muy útil para ampliar condiciones y validar postura",
+      "limitation": "el volumen es grande y el número de participantes debe auditarse desde los archivos antes de publicar una estadística."
+    }
+  ],
+  "nextStep": "Descargar sólo metadatos y salidas procesadas, normalizar unidades y fase del gesto, auditar calidad por participante y generar una versión cohort-ghost separada con mediana, P10–P90, n efectivo y reporte de exclusiones."
+}
